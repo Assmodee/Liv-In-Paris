@@ -4,63 +4,87 @@
     {
         static void Main(string[] args)
         {
-            int[,] adjacenceMatrix = new int[34,34];
+            List<List<int>> adjacenceMatrix = new List<List<int>>();
+            List<List<int>> incidenceMatrix = new List<List<int>>();
             List<Node> nodes = new List<Node>();
-            List<Link> links = new List<Link>();
-            GetFileContent(adjacenceMatrix);
-
-            for (int i = 0; i < 34; i++)
+            FillAdjacenceMatrix(adjacenceMatrix);
+            
+            for (int i = 0; i < adjacenceMatrix.Count; i++)
             {
-                nodes.Add(new Node(i+1));
-            }
-
-            for (int i = 0; i < 34; i++)
-            {
-                for (int j = 0; j < 34; j++)
+                List<int> incidenceList = new List<int>();
+                for (int j = 0; j < adjacenceMatrix[i].Count; j++)
                 {
-                    links.Add(new Link(nodes[i], nodes[j]));
+                    if (adjacenceMatrix[i][j] == 1)
+                    {
+                        incidenceList.Add(j+1);
+                    }
                 }
+                incidenceMatrix.Add(incidenceList);
+                nodes.Add(new Node(i + 1, incidenceList));
             }
-
-            Graph g = new Graph(nodes, links, adjacenceMatrix);
-            g.DepthFirstSearch(new List<int>());
         }
 
 
-        static void GetFileContent(int[,] matrix)
+        static void FillAdjacenceMatrix(List<List<int>> adjacenceMatrix)
         {
             string content = File.ReadAllText("soc-karate.mtx");
             string[] lines = content.Split('\n');
-            bool metaData = false;
+            int nodesCount = 0;
 
-            foreach (string line in lines)
+            for (int i = 24; i < lines.Length && lines[i].Length > 0; i++)
             {
-                if (!metaData && line.Length > 0 && line[0] != '%')
+                int node1 = 0;
+                int node2 = 0;
+                int temp;
+                int j = 0;
+                while (j < lines[i].Length && int.TryParse(lines[i][j].ToString(), out temp))
                 {
-                    metaData = true;
+                    node1 = node1 * 10 + temp;
+                    j++;
                 }
-                else if (line.Length > 0 && line[0] != '%')
+                j++;
+                while (j < lines[i].Length && int.TryParse(lines[i][j].ToString(), out temp))
                 {
-                    string rawValue = "";
-                    int nodeValue = 0;
-                    foreach (char c in line)
+                    node2 = node2 * 10 + temp;
+                    j++;
+                }
+                if (Math.Max(node1, node2) > nodesCount)
+                {
+                    for (int k = 0; k < Math.Max(node1, node2); k++)
                     {
-                        if (c != ' ')
+                        if (k < nodesCount)
                         {
-                            rawValue += c;
+                            for (int l = 0; l < Math.Max(node1, node2) - nodesCount; l++)
+                            {
+                                adjacenceMatrix[k].Add(0);
+                            }
                         }
                         else
                         {
-                            nodeValue = int.Parse(rawValue);
-                            rawValue = "";
+                            adjacenceMatrix.Add(new List<int>());
+                            for (int l = 0; l < Math.Max(node1, node2); l++)
+                            {
+                                adjacenceMatrix[k].Add(0);
+                            }
                         }
                     }
-                    if (rawValue != "")
-                    {
-                        matrix[nodeValue - 1, int.Parse(rawValue) - 1] = 1;
-                        matrix[int.Parse(rawValue) - 1, nodeValue - 1] = 1;
-                    }
+                    nodesCount = Math.Max(node1, node2);
                 }
+                adjacenceMatrix[node1-1][node2-1] = 1;
+                adjacenceMatrix[node2-1][node1-1] = 1;
+            }
+        }
+
+
+        static void DisplayMatrix(List<List<int>> matrix)
+        {
+            for (int i = 0; i < matrix.Count; i++)
+            {
+                for (int j = 0; j < matrix[i].Count; j++)
+                {
+                    Console.Write(matrix[i][j] + " ");
+                }
+                Console.WriteLine();
             }
         }
     }

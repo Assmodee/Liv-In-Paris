@@ -10,6 +10,7 @@ namespace Liv_In_Paris
     {
         int value;
         List<int> links;
+        bool visited = false;
 
 
         public Node(int value, List<int> links)
@@ -23,6 +24,9 @@ namespace Liv_In_Paris
 
 
         public List<int> Links { get { return links; } }
+
+
+        public bool Visited { get { return visited; } set { visited = value; } }
 
 
         public string toString()

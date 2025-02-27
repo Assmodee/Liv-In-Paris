@@ -4,7 +4,7 @@
     {
         static void Main(string[] args)
         {
-            List<List<int>> adjacenceMatrix = new List<List<int>>();
+            List<List<int>> adjacenceMatrix = new List<List<int>>(); 
             List<List<int>> incidenceMatrix = new List<List<int>>();
             List<Node> nodes = new List<Node>();
             FillAdjacenceMatrix(adjacenceMatrix);

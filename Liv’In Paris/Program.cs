@@ -28,11 +28,6 @@
             g.BreadthFirstSearch(new Queue<int>());
             Console.WriteLine("\n\nDFS : ");
             g.DepthFirstSearch();
-            int[] degrees = CalcDeg(adjacenceMatrix);
-
-            Drawing.DrawGraph(adjacenceMatrix, degrees, "graph.png");
-
-            Console.WriteLine("\nL'image du graphe a été enregistrée sous 'graph.png'");
         }
 
 
@@ -99,22 +94,6 @@
                 }
                 Console.WriteLine();
             }
-        }
-
-        static int[] CalcDeg(List<List<int>> adjacenceMatrix)
-        {
-            int nodes = adjacenceMatrix.Count;
-            int[] degrees = new int[nodes];
-            for (int i = 0; i < nodes; i++)
-            {
-                int degree = 0;
-                for (int j = 0; j < nodes; j++)
-                {
-                    degree += adjacenceMatrix[i][j]; /// Chaque 1 représente une connexion
-                }
-                degrees[i] = degree;
-            }
-            return degrees;
         }
     }
 }

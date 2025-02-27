@@ -21,6 +21,48 @@ namespace Liv_In_Paris
         }
 
 
+        public bool isConnected()
+        {
+            /// <summary>Indique si un graphe est connexe.</summary>
+            bool connected = true;
+
+            DepthFirstSearch(0, 0, false); /// DFS sans affichage
+            for (int i = 0; i < nodes.Count && connected; i++)
+            {
+                /// Parcourt chaque noeaud et si un noeud n'est pas visité, le graphe n'est pas connexe (seule une composante est visitée)
+                if (!nodes[i].Visited)
+                {
+                    connected = false;
+                }
+            }
+
+            return connected;
+        }
+
+
+        public bool CyclesSearch(List<int> indexList, int nodeIndex=0, int prevNodeIndex=0)
+        {
+            /// Effectue une DFS et s'arrête dès qu'un noeud déjà visité l'est à nouveau
+            indexList.Add(nodeIndex);
+            foreach (int index in nodes[nodeIndex].Links)
+            {
+                if (index != prevNodeIndex) /// Evite le cas où l'on repasse sur le noeud que l'on vient de visiter
+                {
+                    if (indexList.Contains(index))
+                    {
+                        foreach (int visitedNodeIndex in indexList)
+                        {
+                            Console.Write(nodes[visitedNodeIndex].toString() + " "); /// Affiche le circuit
+                        }
+                        return true;
+                    }
+                    CyclesSearch(indexList, index, nodeIndex);
+                }
+            }
+            return false;
+        }
+
+
         public void ResetNodes()
         {
             /// <summary>Remet chaque noeaud à un état non-visité, sert uniquement pour les parcours</summary>
@@ -31,7 +73,7 @@ namespace Liv_In_Paris
         }
 
 
-        public void DepthFirstSearch(int currentNodeIndex=0, int counter=0)
+        public void DepthFirstSearch(int currentNodeIndex=0, int counter=0, bool display=true)
         {
             /// <summary>Explore en profondeur le graphe à partir d'un noeud donné (par défaut le premier)</summary>
             /// <remarks>NE PAS TOUCHER AU COMPTEUR, il sert à réinitialiser l'état des noeuds</remarks>
@@ -42,12 +84,13 @@ namespace Liv_In_Paris
             }
             counter++;
             nodes[currentNodeIndex].Visited = true; /// Dès qu'un noeud est visité, il est marqué comme tel
+            if (display)
             Console.Write(nodes[currentNodeIndex].toString() + " ");
             foreach (int nodeIndex in nodes[currentNodeIndex].Links) /// Boucle sur les voisins du noeud courant
             {
                 if (!nodes[nodeIndex].Visited) /// Explore uniquement les noeuds non visités, évitant les cycles
                 {
-                    DepthFirstSearch(nodeIndex, counter);
+                    DepthFirstSearch(nodeIndex, counter, display);
                 }
             }
         }

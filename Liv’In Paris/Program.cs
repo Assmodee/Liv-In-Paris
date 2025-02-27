@@ -28,6 +28,9 @@
             g.BreadthFirstSearch(new Queue<int>());
             Console.WriteLine("\n\nDFS : ");
             g.DepthFirstSearch();
+            Console.Write("\n\nConnexité : " + g.isConnected() + "\n\n");
+            Console.Write("\n\nCycles : ");
+            g.CyclesSearch(new List<int>());
         }
 
 

@@ -24,13 +24,17 @@
             }
 
             Graph g = new Graph(nodes, adjacenceMatrix, incidenceMatrix);
-            Console.WriteLine("BFS : ");
+            Console.WriteLine("Tests : \n\nBFS : ");
             g.BreadthFirstSearch(new Queue<int>());
             Console.WriteLine("\n\nDFS : ");
             g.DepthFirstSearch();
             Console.Write("\n\nConnexité : " + g.isConnected() + "\n\n");
             Console.Write("\n\nCycles : ");
-            g.CyclesSearch(new List<int>());
+            List<int> circuits = g.CircuitsSearch(new List<int>());
+            foreach (int index in circuits)
+            {
+                Console.Write(nodes[index].toString() + " ");
+            }
         }
 
 

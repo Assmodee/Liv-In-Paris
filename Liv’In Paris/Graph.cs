@@ -40,26 +40,25 @@ namespace Liv_In_Paris
         }
 
 
-        public bool CyclesSearch(List<int> indexList, int nodeIndex=0, int prevNodeIndex=0)
+        public List<int> CircuitsSearch(List<int> indexList, int nodeIndex=0, int prevNodeIndex=0)
         {
             /// Effectue une DFS et s'arrête dès qu'un noeud déjà visité l'est à nouveau
             indexList.Add(nodeIndex);
-            foreach (int index in nodes[nodeIndex].Links)
+            /// Continue le parcours sauf si le premier et dernier élément de la liste des noeuds visités est le même, ce qui indique un circuit
+            for (int i = 0; i < nodes[nodeIndex].Links.Count && (indexList[0] != indexList[indexList.Count - 1] || indexList.Count < 2); i++)
             {
+                int index = nodes[nodeIndex].Links[i];
                 if (index != prevNodeIndex) /// Evite le cas où l'on repasse sur le noeud que l'on vient de visiter
                 {
                     if (indexList.Contains(index))
                     {
-                        foreach (int visitedNodeIndex in indexList)
-                        {
-                            Console.Write(nodes[visitedNodeIndex].toString() + " "); /// Affiche le circuit
-                        }
-                        return true;
+                        indexList.Add(index);
+                        return indexList;
                     }
-                    CyclesSearch(indexList, index, nodeIndex);
+                    CircuitsSearch(indexList, index, nodeIndex);
                 }
             }
-            return false;
+            return indexList;
         }
 
 

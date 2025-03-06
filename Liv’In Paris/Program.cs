@@ -1,4 +1,6 @@
-﻿namespace Liv_In_Paris
+﻿using System.Diagnostics;
+
+namespace Liv_In_Paris
 {
     internal class Program
     {
@@ -23,18 +25,10 @@
                 nodes.Add(new Node(i + 1, incidenceList)); /// <remarks>Les listes d'incidences sont aussi données en paramètres des noeuds (plus facile pour les parcours de graphe)</remarks>
             }
 
-            Graph g = new Graph(nodes, adjacenceMatrix, incidenceMatrix);
-            Console.WriteLine("Tests : \n\nBFS : ");
-            g.BreadthFirstSearch(new Queue<int>());
-            Console.WriteLine("\n\nDFS : ");
-            g.DepthFirstSearch();
-            Console.Write("\n\nConnexité : " + g.isConnected() + "\n\n");
-            Console.Write("\n\nCycles : ");
-            List<int> circuits = g.CircuitsSearch(new List<int>());
-            foreach (int index in circuits)
-            {
-                Console.Write(nodes[index].toString() + " ");
-            }
+
+            Tests_Unitaires tests = new Tests_Unitaires(adjacenceMatrix, incidenceMatrix, nodes);
+            tests.Test();
+
         }
 
 
@@ -102,5 +96,6 @@
                 Console.WriteLine();
             }
         }
+
     }
 }

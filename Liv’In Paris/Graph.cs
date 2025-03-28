@@ -11,13 +11,15 @@ namespace Liv_In_Paris
         List<List<int>> incidenceMatrix;
         List<Node<T>> nodesList;
         List<List<double>> weights;
+        Dictionary<string, int> reverseIdDic;
 
 
-        public Graph(List<List<int>> incidenceMatrix, List<Node<T>> nodesList, List<List<double>> weights)
+        public Graph(List<List<int>> incidenceMatrix, List<Node<T>> nodesList, List<List<double>> weights, Dictionary<string, int> reverseIdDic)
         {
             this.incidenceMatrix = incidenceMatrix;
             this.nodesList = nodesList;
             this.weights = weights;
+            this.reverseIdDic = reverseIdDic;
         }
 
 
@@ -36,6 +38,12 @@ namespace Liv_In_Paris
         public List<Node<T>> NodesList
         {
             get { return nodesList; }
+        }
+
+
+        public Dictionary<string, int> ReverseIdDic
+        {
+            get { return reverseIdDic; }
         }
     }
 }

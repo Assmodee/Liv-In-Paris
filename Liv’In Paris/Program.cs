@@ -11,6 +11,7 @@ namespace Liv_In_Paris
         {
             string stationsFile = File.ReadAllText("Stations.txt");
             string connexionsFile = File.ReadAllText("Connexions.txt");
+            Dictionary<string, int> rStationsDic = new Dictionary<string, int>();
 
             /// <summary>Récupère les différentes informations sur le métro (stations, connexions, et temps de changement
             /// entre deux stations, et les enregistre dans les structures de données correspondantes. 
@@ -24,19 +25,19 @@ namespace Liv_In_Paris
             /// Ex : commuteTime[1] -> 0.47 (Correspond à connexion[1], il faut 47 secondes pour changer de 'La Defense'
             /// à 'Esplanade de la Defense'.
             /// </summary>
-            List<Node<string>> stations = GetStationsList(stationsFile);
+            List<Node<string>> stations = GetStationsList(stationsFile, rStationsDic);
             List<List<int>> connexions = GetConnexions(connexionsFile);
             List<List<double>> commuteTime = GetCommuteTime(connexionsFile);
 
             /// Instancie le graphe avec les données récupérées.
-            Graph<string> metroGraph = new Graph<string>(connexions, stations, commuteTime);
+            Graph<string> metroGraph = new Graph<string>(connexions, stations, commuteTime, rStationsDic);
 
             Console.WriteLine("Program finished ...");
             Console.ReadKey();
         }
 
 
-        static List<Node<string>> GetStationsList(string stations)
+        static List<Node<string>> GetStationsList(string stations, Dictionary<string, int> dic)
         {
             List<Node<string>> nodes = new List<Node<string>>();
             nodes.Add(new Node<string>(0, ""));
@@ -54,6 +55,7 @@ namespace Liv_In_Paris
                     }
                 }
                 nodes.Add(new Node<string>(id, stationName));
+                dic[stationName] = id;
             }
             return nodes;
         }

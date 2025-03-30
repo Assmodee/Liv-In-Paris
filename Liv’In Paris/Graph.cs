@@ -42,7 +42,7 @@ namespace Liv_In_Paris
             get { return nodesList; }
         }
 
-        public Dictionary<string, int> ReverseIdDic
+        public Dictionary<T, int> ReverseIdDic
         {
             get { return reverseIdDic; }
         }

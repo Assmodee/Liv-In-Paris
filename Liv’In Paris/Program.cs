@@ -14,12 +14,12 @@ namespace Liv_In_Paris
             Dictionary<string, int> rStationsDic = new Dictionary<string, int>();
 
             /// <summary>Récupère les différentes informations sur le métro (stations, connexions, et temps de changement
-            /// entre deux stations, et les enregistre dans les structures de données correspondantes. 
+            /// entre deux stations), et les enregistre dans les structures de données correspondantes. 
             /// 'stations' enregistre les stations sous forme de 'Node' avec un id correspondant à l'indice de la liste 
             /// et une value correspondant au nom de la station.
             /// Ex : stations[1] -> Node(id=1, value="La Defense").
             /// 'connexions' enregistre les liens entre les stations avec l'indice de la ligne correspondant à l'indice
-            /// de la stationqui partage les liens.
+            /// de la station qui partage les liens.
             /// Ex : connexions[1] -> 2 (1 correspond à 'La Defense' et 2 correspond à 'Esplanade de la Defense')
             /// commuteTime enregistre les temps de changement entre chaque station en minutes.
             /// Ex : commuteTime[1] -> 0.47 (Correspond à connexion[1], il faut 47 secondes pour changer de 'La Defense'
@@ -32,24 +32,28 @@ namespace Liv_In_Paris
             /// Instancie le graphe avec les données récupérées.
             Graph<string> metroGraph = new Graph<string>(connexions, stations, commuteTime, rStationsDic);
 
+            Tests<string> t = new Tests<string>(metroGraph);
+            t.TestFunction();
+
             Console.WriteLine("Program finished ...");
             Console.ReadKey();
         }
 
+        #region Récupération de données
 
         static List<Node<string>> GetStationsList(string stations, Dictionary<string, int> dic)
         {
             List<Node<string>> nodes = new List<Node<string>>();
-            nodes.Add(new Node<string>(0, ""));
-            string[] lines = stations.Split('\n');
+            nodes.Add(new Node<string>(0, "")); /// Le premier noeud ne correspond à aucune station (problème d'index), il est donc vide
+            string[] lines = stations.Split('\n'); /// Sépare le texte selon les lignes
             for (int i = 1; i < lines.Length; i++)
             {
-                string[] tokens = lines[i].Split(';');
-                int id = int.Parse(tokens[0]);
+                string[] tokens = lines[i].Split(';'); /// Sépare les lignes selon les ; pour obtenir les différentes informations
+                int id = int.Parse(tokens[0]); /// Correspond à l'id de la station
                 string stationName = "";
                 foreach (char c in tokens[1])
                 {
-                    if (c != '\r')
+                    if (c != '\r') /// Evite le retour chariot sinon ça foire l'affichage
                     {
                         stationName += c;
                     }
@@ -65,18 +69,18 @@ namespace Liv_In_Paris
         {
             List<List<int>> links = new List<List<int>>();
             links.Add(new List<int>());
-            links[0].Add(0);
-            string[] lines = connexions.Split('\n');
+            links[0].Add(0); /// Le premier noeud étant vide, il pointe vers lui-même
+            string[] lines = connexions.Split('\n'); /// Même fonctionnement que pour obtenir les stations
             for (int i = 1; i < lines.Length-1; i++)
             {
                 string[] tokens = lines[i].Split(';');
-                int id1 = int.Parse(tokens[0]);
-                int id2 = int.Parse(tokens[1]);
+                int id1 = int.Parse(tokens[0]); /// id de la station de départ
+                int id2 = int.Parse(tokens[1]); /// id de la station d'arrivée
                 if (id1 < links.Count)
                 {
                     links[id1].Add(id2);
                 }
-                else
+                else /// Ajoute autant de List que nécessaire pour la matrice d'incidence (triée par ordre croissant d'id)
                 {
                     int count = links.Count;
                     for (int j = 0; j < id1 - count + 1; j++)
@@ -94,18 +98,18 @@ namespace Liv_In_Paris
         {
             List<List<double>> weights = new List<List<double>>();
             weights.Add(new List<double>());
-            weights[0].Add(0.0);
-            string[] lines = connexions.Split('\n');
+            weights[0].Add(0.0); /// La première connexion est inutile, on intialise à 0.0
+            string[] lines = connexions.Split('\n'); /// Encore meêm fonctionnement
             for (int i = 1; i < lines.Length - 1; i++)
             {
                 string[] tokens = lines[i].Split(';');
-                int id1 = int.Parse(tokens[0]);
+                int id1 = int.Parse(tokens[0]); /// Récupère l'id de la station de départ qui correspond à l'indice dans la matrice d'incidence
                 double weight = Convert.ToDouble(tokens[3]);
                 if (id1 < weights.Count)
                 {
                     weights[id1].Add(weight);
                 }
-                else
+                else /// Même système que pour récupérer les connexions
                 {
                     int count = weights.Count;
                     for (int j = 0; j < id1 - count + 1; j++)
@@ -117,5 +121,7 @@ namespace Liv_In_Paris
             }
             return weights;
         }
+
+        #endregion
     }
 }

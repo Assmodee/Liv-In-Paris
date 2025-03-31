@@ -35,7 +35,7 @@ namespace Liv_In_Paris
             Tests<string> t = new Tests<string>(metroGraph);
             t.TestFunction();
 
-            Console.WriteLine("Program finished ...");
+            Console.WriteLine("\n\nProgram finished ...");
             Console.ReadKey();
         }
 

@@ -112,28 +112,45 @@ namespace Liv_In_Paris
         }
 
 
-        public void Dijkstra(int startingNodeId, int endingNodeId, int currentNodeId=0, List<int> visitedNodes=null, int[] predecessors=null, double[] distances=null, double cumulDistance=0)
+        public List<int> Dijkstra(int startingNodeId, int endingNodeId)
         {
-            if (currentNodeId == 0)
+            /// Initialisation
+            double[] distances = new double[nodesList.Count];
+            int[] predecessors = new int[nodesList.Count];
+            List<int> visitedNodes = new List<int>();
+            for (int i = 0; i < distances.Length; i++)
+                distances[i] = double.MaxValue - 1;
+            distances[0] = double.MaxValue;
+            distances[startingNodeId] = 0;
+            int currentNodeId = 0;
+            double cumulDist = 0;
+
+            /// Dijkstra commence ici
+            while (currentNodeId != endingNodeId)
             {
-                visitedNodes = new List<int>();
-                predecessors = new int[nodesList.Count];
-                distances = new double[nodesList.Count];
-                currentNodeId = startingNodeId;
-                for (int i = 0; i < distances.Length; i++)
+                currentNodeId = GetMinElementId(distances); /// Récupère la station la plus proche
+                cumulDist += distances[currentNodeId];
+                distances[currentNodeId] = double.MaxValue; /// Assigne la station à +inf
+                for (int i = 0; i < incidenceMatrix[currentNodeId].Count; i++)
                 {
-                    distances[i] = int.MaxValue-1;
+                    /// Mise à jour des distances des stations
+                    if (!visitedNodes.Contains(incidenceMatrix[currentNodeId][i]) && distances[incidenceMatrix[currentNodeId][i]] > cumulDist + weights[currentNodeId][i])
+                    {
+                        distances[incidenceMatrix[currentNodeId][i]] = cumulDist + weights[currentNodeId][i];
+                        predecessors[incidenceMatrix[currentNodeId][i]] = currentNodeId; /// Marque le prédecesseur pour retrouver le plus court chemin
+                    }
                 }
-                distances[currentNodeId] = 0;
-                distances[0] = int.MaxValue;
+                visitedNodes.Add(currentNodeId); /// Ajoute la station aux stations visitées
             }
-            currentNodeId = GetMinElementId(distances);
-            distances[currentNodeId] = int.MaxValue;
-            Console.WriteLine(currentNodeId);
-            if (currentNodeId != endingNodeId)
+            visitedNodes = new List<int>() { endingNodeId };
+            while (currentNodeId != startingNodeId)
             {
-                Dijkstra(startingNodeId, endingNodeId, currentNodeId, visitedNodes, predecessors, distances, cumulDistance);
+                currentNodeId = predecessors[currentNodeId]; /// Parcourt le chemin à l'envers
+                visitedNodes.Add(currentNodeId);
             }
+            visitedNodes.Reverse();
+
+            return visitedNodes; /// Liste des stations pour le plus court chemin
         }
 
         # endregion

@@ -38,7 +38,11 @@ namespace Liv_In_Paris
             }
             Console.WriteLine("\n" + BFSNodes.Count + " Stations\n");
 
-            testGraph.Dijkstra(1, 3);
+            List<int> dijkstraPath = testGraph.Dijkstra(1, 15);
+            foreach (int stationId in dijkstraPath)
+            {
+                Console.Write(testGraph.NodesList[stationId].toString() + " ");
+            }
         }
     }
 }

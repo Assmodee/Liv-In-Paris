@@ -31,12 +31,14 @@ namespace Liv_In_Paris
 
             Console.WriteLine("\nBFS test : ");
             List<int> BFSNodes = new List<int>();
-            testGraph.BFS(BFSNodes, new Queue<int>()); /// Le BFS a besoin d'une Queue vide au début
+            testGraph.BFS(BFSNodes); /// Remplit la liste par BFS
             foreach (int i in BFSNodes)
             {
                 Console.Write(testGraph.NodesList[i].toString() + " | "); /// Affiche la liste des noeuds par BFS
             }
-            Console.WriteLine("\n" + BFSNodes.Count + " Stations");
+            Console.WriteLine("\n" + BFSNodes.Count + " Stations\n");
+
+            testGraph.Dijkstra(1, 3);
         }
     }
 }

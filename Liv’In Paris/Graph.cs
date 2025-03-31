@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Runtime.CompilerServices;
 using System.Text;
 using System.Threading.Tasks;
 
@@ -73,8 +74,12 @@ namespace Liv_In_Paris
         }
 
 
-        public void BFS(List<int> visitedNodes, Queue<int> nodesToVisit, int currentNodeId=1)
+        public void BFS(List<int> visitedNodes, Queue<int> nodesToVisit=null, int currentNodeId=1)
         {
+            if (nodesToVisit == null)
+            {
+                nodesToVisit = new Queue<int>();
+            }
             if (visitedNodes.Count < nodesList.Count)
             {
                 foreach (int nodeId in incidenceMatrix[currentNodeId])
@@ -87,6 +92,47 @@ namespace Liv_In_Paris
                 visitedNodes.Add(currentNodeId);
                 if (nodesToVisit.Count > 0) /// Continue uniquement s'il reste des noeuds à visiter
                     BFS(visitedNodes, nodesToVisit, nodesToVisit.Dequeue());
+            }
+        }
+
+
+        public int GetMinElementId(double[] arr)
+        {
+            int index = 0;
+
+            for (int i = 0; i < arr.Length; i++)
+            {
+                if (arr[i] < arr[index])
+                {
+                    index = i;
+                }
+            }
+
+            return index;
+        }
+
+
+        public void Dijkstra(int startingNodeId, int endingNodeId, int currentNodeId=0, List<int> visitedNodes=null, int[] predecessors=null, double[] distances=null, double cumulDistance=0)
+        {
+            if (currentNodeId == 0)
+            {
+                visitedNodes = new List<int>();
+                predecessors = new int[nodesList.Count];
+                distances = new double[nodesList.Count];
+                currentNodeId = startingNodeId;
+                for (int i = 0; i < distances.Length; i++)
+                {
+                    distances[i] = int.MaxValue-1;
+                }
+                distances[currentNodeId] = 0;
+                distances[0] = int.MaxValue;
+            }
+            currentNodeId = GetMinElementId(distances);
+            distances[currentNodeId] = int.MaxValue;
+            Console.WriteLine(currentNodeId);
+            if (currentNodeId != endingNodeId)
+            {
+                Dijkstra(startingNodeId, endingNodeId, currentNodeId, visitedNodes, predecessors, distances, cumulDistance);
             }
         }
 

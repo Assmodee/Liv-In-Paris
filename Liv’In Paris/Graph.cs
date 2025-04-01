@@ -10,6 +10,7 @@ namespace Liv_In_Paris
     class Graph<T>
     {
         List<List<int>> incidenceMatrix;
+        int size; /// # of connexions
         List<Node<T>> nodesList; /// Liste des noeuds par id croissant
         List<List<double>> weights; /// Liste des poids des connexions
         Dictionary<T, int> reverseIdDic; /// Dictionnaire value vers id pour opérer sur les noeuds depuis leur valeur
@@ -21,6 +22,13 @@ namespace Liv_In_Paris
             this.nodesList = nodesList;
             this.weights = weights;
             this.reverseIdDic = reverseIdDic;
+            for (int i = 0; i < incidenceMatrix.Count; i++)
+            {
+                for (int j = 0; j < incidenceMatrix[i].Count; j++)
+                {
+                    size++;
+                }
+            }
         }
 
 
@@ -123,25 +131,25 @@ namespace Liv_In_Paris
             distances[0] = double.MaxValue;
             distances[startingNodeId] = 0;
             int currentNodeId = 0;
-            double cumulDist = 0;
 
             /// Dijkstra commence ici
             while (currentNodeId != endingNodeId)
             {
                 currentNodeId = GetMinElementId(distances); /// Récupère la station la plus proche
-                cumulDist += distances[currentNodeId];
                 distances[currentNodeId] = double.MaxValue; /// Assigne la station à +inf
                 for (int i = 0; i < incidenceMatrix[currentNodeId].Count; i++)
                 {
                     /// Mise à jour des distances des stations
-                    if (!visitedNodes.Contains(incidenceMatrix[currentNodeId][i]) && distances[incidenceMatrix[currentNodeId][i]] > cumulDist + weights[currentNodeId][i])
+                    if (!visitedNodes.Contains(incidenceMatrix[currentNodeId][i]) && distances[incidenceMatrix[currentNodeId][i]] > weights[currentNodeId][i])
                     {
-                        distances[incidenceMatrix[currentNodeId][i]] = cumulDist + weights[currentNodeId][i];
+                        distances[incidenceMatrix[currentNodeId][i]] = weights[currentNodeId][i];
                         predecessors[incidenceMatrix[currentNodeId][i]] = currentNodeId; /// Marque le prédecesseur pour retrouver le plus court chemin
                     }
                 }
                 visitedNodes.Add(currentNodeId); /// Ajoute la station aux stations visitées
-            }
+            } /// Fin algo
+
+            /// Remplit la liste des noeuds à visiter pour le plus court chemin
             visitedNodes = new List<int>() { endingNodeId };
             while (currentNodeId != startingNodeId)
             {
@@ -152,6 +160,48 @@ namespace Liv_In_Paris
 
             return visitedNodes; /// Liste des stations pour le plus court chemin
         }
+
+
+        public List<int> BellmanFord(int startingNodeId, int endingNodeId)
+        {
+            /// Initialisation
+            double[] distances = new double[nodesList.Count];
+            int[] predecessors = new int[nodesList.Count];
+            List<int> visitedNodes = new List<int>() { endingNodeId };
+            for (int i = 0; i < distances.Length; i++)
+                distances[i] = double.MaxValue - 1;
+            distances[0] = double.MaxValue;
+            distances[startingNodeId] = 0;
+
+            /// Bellman-Ford
+            for (int cpt = 0; cpt < size; cpt++)
+            {
+                for (int i = 1; i < incidenceMatrix.Count; i++)
+                {
+                    for (int j = 0; j < incidenceMatrix[i].Count; j++)
+                    {
+                        if (distances[i] + Weights[i][j] < distances[incidenceMatrix[i][j]])
+                        {
+                            /// Mets à jour les distances et les prédecesseurs
+                            distances[incidenceMatrix[i][j]] = distances[i] + Weights[i][j];
+                            predecessors[incidenceMatrix[i][j]] = i;
+                        }
+                    }
+                }
+            }
+
+            /// Remplit la liste des noeuds du plus court chemin
+            int currentNodeId = endingNodeId;
+            while (currentNodeId != startingNodeId)
+            {
+                currentNodeId = predecessors[currentNodeId];
+                visitedNodes.Add(currentNodeId);
+            }
+            visitedNodes.Reverse(); /// Remet la liste à l'endroit
+
+            return visitedNodes;
+        }
+
 
         # endregion
     }

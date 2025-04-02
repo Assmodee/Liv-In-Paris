@@ -10,6 +10,7 @@ namespace Liv_In_Paris
     class Graph<T>
     {
         List<List<int>> incidenceMatrix;
+        double[,] adjacenceMatrix;
         int size; /// # of connexions
         List<Node<T>> nodesList; /// Liste des noeuds par id croissant
         List<List<double>> weights; /// Liste des poids des connexions
@@ -27,6 +28,30 @@ namespace Liv_In_Paris
                 for (int j = 0; j < incidenceMatrix[i].Count; j++)
                 {
                     size++;
+                }
+            }
+            adjacenceMatrix = new double[incidenceMatrix.Count, incidenceMatrix.Count];
+            for (int i = 0; i < incidenceMatrix.Count; i++)
+            {
+                for (int j = 0; j < incidenceMatrix.Count; j++)
+                {
+                    adjacenceMatrix[i, j] = double.MaxValue;
+                }
+                for (int j = 0; j < incidenceMatrix[i].Count; j++)
+                {
+                    adjacenceMatrix[i, incidenceMatrix[i][j]] = weights[i][j];
+                }
+            }
+        }
+
+
+        public void CopyElements(double[,] m1, double[,] m2)
+        {
+            for (int i = 0; i < m1.GetLength(0); i++)
+            {
+                for (int j = 0; j < m1.GetLength(1); j++)
+                {
+                    m2[i, j] = m1[i, j];
                 }
             }
         }
@@ -198,6 +223,50 @@ namespace Liv_In_Paris
                 visitedNodes.Add(currentNodeId);
             }
             visitedNodes.Reverse(); /// Remet la liste à l'endroit
+
+            return visitedNodes;
+        }
+
+
+        public List<int> FloydWarshall(int startingNodeId, int endingNodeId)
+        {
+            /// Initialisation
+            List<int> visitedNodes = new List<int>();
+            double[,] distances = new double[adjacenceMatrix.GetLength(0), adjacenceMatrix.GetLength(1)];
+            int[,] pathMatrix = new int[adjacenceMatrix.GetLength(0), adjacenceMatrix.GetLength(1)];
+            int nodesCount = nodesList.Count;
+            CopyElements(adjacenceMatrix, distances);
+            for (int i = 0; i < nodesCount; i++)
+            {
+                for (int j = 0; j < nodesCount; j++)
+                {
+                    pathMatrix[i, j] = j;
+                }
+            }
+
+            /// Commence ici
+            for (int k = 0; k < nodesCount; k++)
+            {
+                for (int i = 0; i < nodesCount; i++)
+                {
+                    for (int j = 0; j < nodesCount; j++)
+                    {
+                        if (distances[i, k] + distances[k, j] < distances[i, j])
+                        {
+                            distances[i, j] = distances[i, k] + distances[k, j]; /// Met à jour la distance
+                            pathMatrix[i, j] = pathMatrix[i, k]; /// Met à jour la matrice de correspondance des plus courts chemins pour pouvoir lister les noeuds empruntés lors d'un chemin
+                        }
+                    }
+                }
+            }
+
+            int currentNodeId = startingNodeId;
+            while (currentNodeId != endingNodeId)
+            {
+                visitedNodes.Add(currentNodeId);
+                currentNodeId = pathMatrix[currentNodeId, endingNodeId]; /// Reconstruit la liste des noeuds empruntés pour un plus court chemin
+            }
+            visitedNodes.Add(endingNodeId);
 
             return visitedNodes;
         }

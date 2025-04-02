@@ -74,7 +74,6 @@ namespace Liv_In_Paris
                 Console.Write(testGraph.NodesList[i].toString() + " | "); /// Affiche la liste des noeuds par DFS
             }
             Console.WriteLine("\n" + DFSNodes.Count + " Stations");
-            sepa();
 
             Separator();
 
@@ -86,41 +85,44 @@ namespace Liv_In_Paris
                 Console.Write(testGraph.NodesList[i].toString() + " | "); /// Affiche la liste des noeuds par BFS
             }
             Console.WriteLine("\n" + BFSNodes.Count + " Stations");
-            sepa();
 
             Separator();
             Separator();
 
-            List<int> dijkstraPath, bellmanFordPath;
+            List<int> dijkstraPath, bellmanFordPath, floydWarshallPath;
             Console.WriteLine("\nPlus court chemin de République à Saint-Mandé : (Dijkstra)\n");
             dijkstraPath = testGraph.Dijkstra(67, 23); /// Applique l'algorithme de Dijkstra
             displayPathInfo(dijkstraPath);
-            sepa();
 
             Separator();
 
             Console.WriteLine("\nPlus court chemin de Porte de La Défense à Châteu de Vincennes : (Dijkstra)\n");
             dijkstraPath = testGraph.Dijkstra(1, 25);
             displayPathInfo(dijkstraPath);
-            sepa();
 
             Separator();
 
             Console.WriteLine("\nPlus court chemin de République à Saint-Mandé : (Bellman-Ford)\n");
             bellmanFordPath = testGraph.BellmanFord(67, 23); /// Applique Bellman-Ford
             displayPathInfo(bellmanFordPath);
-            sepa();
 
             Separator();
 
             Console.WriteLine("\nPlus court chemin de La Défense à Château de Vincennes : (Bellman-Ford)\n");
             bellmanFordPath = testGraph.BellmanFord(1, 25);
             displayPathInfo(bellmanFordPath);
-        }
 
-        public void sepa()
-        { 
-            Console.WriteLine("====================================================================================================");
+            Separator();
+
+            Console.WriteLine("\nPlus court chemin de République à Saint-Mandé : (Floyd-Warshall)\n");
+            floydWarshallPath = testGraph.FloydWarshall(67, 23); /// Applique Floyd-Warshall
+            displayPathInfo(floydWarshallPath);
+
+            Separator();
+
+            Console.WriteLine("\nPlus court chemin de La Défense à Château de Vincennes : (Floyd-Warshall)\n");
+            floydWarshallPath = testGraph.FloydWarshall(1, 25);
+            displayPathInfo(floydWarshallPath);
         }
     }
 }

@@ -50,7 +50,7 @@ namespace Liv_In_Paris
 
         public string toString()
         {
-            return "[" + value.ToString() + ", " + " Lon : "+longitude + " Lat : " + latitude + "]";
+            return "[" + value.ToString() + "]";
         }
     }
 }

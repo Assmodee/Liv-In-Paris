@@ -52,6 +52,17 @@ namespace Liv_In_Paris
         }
 
 
+        public void Separator()
+        {
+            Console.WriteLine();
+            for (int i = 0; i < 209; i++)
+            {
+                Console.Write("=");
+            }
+            Console.WriteLine();
+        }
+
+
         public void TestFunction()
         {
 
@@ -64,6 +75,8 @@ namespace Liv_In_Paris
             }
             Console.WriteLine("\n" + DFSNodes.Count + " Stations");
 
+            Separator();
+
             Console.WriteLine("\nBFS test : ");
             List<int> BFSNodes = new List<int>();
             testGraph.BFS(BFSNodes); /// Remplit la liste par BFS
@@ -73,18 +86,27 @@ namespace Liv_In_Paris
             }
             Console.WriteLine("\n" + BFSNodes.Count + " Stations");
 
+            Separator();
+            Separator();
+
             List<int> dijkstraPath, bellmanFordPath;
             Console.WriteLine("\nPlus court chemin de République à Saint-Mandé : (Dijkstra)\n");
             dijkstraPath = testGraph.Dijkstra(67, 23); /// Applique l'algorithme de Dijkstra
             displayPathInfo(dijkstraPath);
 
-            Console.WriteLine("\nPlus court chemin de Porte de Saint-Ouen à Place d'Italie : (Dijkstra)\n");
+            Separator();
+
+            Console.WriteLine("\nPlus court chemin de Porte de La Défense à Châteu de Vincennes : (Dijkstra)\n");
             dijkstraPath = testGraph.Dijkstra(1, 25);
             displayPathInfo(dijkstraPath);
+
+            Separator();
 
             Console.WriteLine("\nPlus court chemin de République à Saint-Mandé : (Bellman-Ford)\n");
             bellmanFordPath = testGraph.BellmanFord(67, 23); /// Applique Bellman-Ford
             displayPathInfo(bellmanFordPath);
+
+            Separator();
 
             Console.WriteLine("\nPlus court chemin de La Défense à Château de Vincennes : (Bellman-Ford)\n");
             bellmanFordPath = testGraph.BellmanFord(1, 25);

@@ -35,6 +35,8 @@ namespace Liv_In_Paris
             Tests<string> t = new Tests<string>(metroGraph);
             t.TestFunction();
 
+            Drawing.DrawGraphFromCoordinates(stations, connexions, "graphe_oriente.png");
+
             Console.WriteLine("\n\nProgram finished ...");
             Console.ReadKey();
         }

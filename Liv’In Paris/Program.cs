@@ -44,7 +44,7 @@ namespace Liv_In_Paris
         static List<Node<string>> GetStationsList(string stations, Dictionary<string, int> dic)
         {
             List<Node<string>> nodes = new List<Node<string>>();
-            nodes.Add(new Node<string>(0, "")); /// Le premier noeud ne correspond à aucune station (problème d'index), il est donc vide
+            nodes.Add(new Node<string>(0, "",0,0)); /// Le premier noeud ne correspond à aucune station (problème d'index), il est donc vide
             string[] lines = stations.Split('\n'); /// Sépare le texte selon les lignes
             for (int i = 1; i < lines.Length; i++)
             {
@@ -58,7 +58,24 @@ namespace Liv_In_Paris
                         stationName += c;
                     }
                 }
-                nodes.Add(new Node<string>(id, stationName));
+
+
+                double lon = -1.0;
+                double lat = -1.0;
+
+                double lonVal;
+                if (double.TryParse(tokens[2], System.Globalization.NumberStyles.Any, System.Globalization.CultureInfo.InvariantCulture, out lonVal))
+                {
+                    lon = lonVal;
+                }
+
+                double latVal;
+                if (double.TryParse(tokens[3], System.Globalization.NumberStyles.Any, System.Globalization.CultureInfo.InvariantCulture, out latVal))
+                {
+                    lat = latVal;
+                }
+
+                nodes.Add(new Node<string>(id, stationName, lon, lat));
                 dic[stationName] = id;
             }
             return nodes;
@@ -104,7 +121,8 @@ namespace Liv_In_Paris
             {
                 string[] tokens = lines[i].Split(';');
                 int id1 = int.Parse(tokens[0]); /// Récupère l'id de la station de départ qui correspond à l'indice dans la matrice d'incidence
-                double weight = Convert.ToDouble(tokens[3]);
+                ///double weight = Convert.ToDouble(tokens[3]);/// probleme avec virgule et point( systéme en français ok mais espagnol, divisé par virgule donc pas ok
+                double weight = double.Parse(tokens[3], System.Globalization.CultureInfo.InvariantCulture);///solution probleme separateur virgule
                 if (id1 < weights.Count)
                 {
                     weights[id1].Add(weight);

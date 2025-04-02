@@ -10,12 +10,16 @@ namespace Liv_In_Paris
     {
         int id;
         T value;
+        double longitude;
+        double latitude;
 
 
-        public Node(int id, T value)
+        public Node(int id, T value, double longitude, double latitude)
         {
             this.id = id;
             this.value = value;
+            this.longitude = longitude;
+            this.latitude = latitude;
         }
 
 
@@ -28,6 +32,19 @@ namespace Liv_In_Paris
         public T Value
         {
             get { return value; }
+        }
+
+
+        public double Longitude
+        {
+            get { return longitude; }
+            set { longitude = value; }
+        }
+
+        public double Latitude
+        {
+            get { return latitude; }
+            set { latitude = value; }
         }
 
 

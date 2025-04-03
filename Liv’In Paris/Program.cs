@@ -9,9 +9,134 @@ namespace Liv_In_Paris
     {
         static void Main(string[] args)
         {
-            string stationsFile = File.ReadAllText("Stations.txt");
-            string connexionsFile = File.ReadAllText("Connexions.txt");
-            Dictionary<string, int> rStationsDic = new Dictionary<string, int>();
+            SQL sql = new SQL();
+
+            try
+            {
+                // Exemple d'utilisation des fonctions
+
+                sql.SupprimerClient(1);
+                sql.SupprimerClient(1);
+                sql.SupprimerClient(1);
+
+                // Ajouter un compte
+                Console.WriteLine("Ajout d'un compte...");
+                sql.AjouterCompte("securepassword", true);
+
+                // Ajouter un client
+                Console.WriteLine("Ajout d'un client...");
+                sql.AjouterClient(1,"Doe", "John", "john.doe@example.com", "0768243263","chatelet");
+
+                // Afficher tous les clients
+                Console.WriteLine("Liste des clients :");
+                sql.AfficherClients();
+
+                // Modifier un client
+                Console.WriteLine("Modification d'un client...");
+                sql.ModifierClient(1, "Smith", "Jane", "jane.smith@example.com", "0768243263","chatelet");
+
+                // Afficher tous les clients après modification
+                Console.WriteLine("Liste des clients après modification :");
+                sql.AfficherClients();
+
+                // Supprimer un client
+                Console.WriteLine("Suppression d'un client...");
+                sql.SupprimerClient(1);
+
+                // Afficher tous les clients après suppression
+                Console.WriteLine("Liste des clients après suppression :");
+                sql.AfficherClients();
+
+                // Ajouter une entreprise
+                Console.WriteLine("Ajout d'une entreprise...");
+                sql.AjouterEntreprise("Entreprise Test", "Referent Test", 2, "Station B");
+
+                // Afficher toutes les entreprises
+                Console.WriteLine("Liste des entreprises :");
+                sql.AfficherEntreprises("nom_entreprise");
+
+                // Ajouter un consommateur
+                Console.WriteLine("Ajout d'un consommateur...");
+                sql.AjouterConsommateur(2);
+
+                // Afficher tous les consommateurs
+                Console.WriteLine("Liste des consommateurs :");
+                sql.AfficherConsommateurs("id_consommateur");
+
+                // Ajouter un cuisinier
+                Console.WriteLine("Ajout d'un cuisinier...");
+                sql.AjouterCuisinier("Chef A", 3);
+
+                // Afficher tous les cuisiniers
+                Console.WriteLine("Liste des cuisiniers :");
+                var cuisiniers = sql.AfficherCuisiniers();
+                foreach (var cuisinier in cuisiniers)
+                {
+                    Console.WriteLine(cuisinier);
+                }
+
+                // Ajouter un ingrédient
+                Console.WriteLine("Ajout d'un ingrédient...");
+                sql.AjouterIngredient("Tomate");
+
+                // Ajouter un plat
+                Console.WriteLine("Ajout d'un plat...");
+                sql.AjouterMet("Pizza", 10.00m, "Plat principal", "Végétarien", "Italienne", 2, 1);
+
+                // Associer un ingrédient à un plat
+                Console.WriteLine("Association d'un ingrédient à un plat...");
+                sql.AssocierIngredientAMet(1, "Tomate");
+
+                // Afficher les ingrédients d'un plat
+                Console.WriteLine("Ingrédients du plat :");
+                var ingredients = sql.AfficherIngredientsParPlat(1);
+                foreach (var ingredient in ingredients)
+                {
+                    Console.WriteLine(ingredient);
+                }
+
+                // Ajouter une commande
+                Console.WriteLine("Ajout d'une commande...");
+                sql.AjouterCommande(20, 1, DateTime.Now, DateTime.Now.AddDays(5), 1, 1);
+
+                // Afficher toutes les commandes
+                Console.WriteLine("Liste des commandes :");
+                var commandes = sql.AfficherCommandes();
+                foreach (var commande in commandes)
+                {
+                    Console.WriteLine(commande);
+                }
+
+                // Ajouter un plat dans une commande
+                Console.WriteLine("Ajout d'un plat dans une commande...");
+                sql.AjouterPlatDansCommande(1, 1, 1);
+
+                // Noter une commande
+                Console.WriteLine("Noter une commande...");
+                sql.NoterCommande(1, 1, 1, 4.5f, "Très bon", 4.0f, "Merci");
+
+                // Afficher des statistiques
+                Console.WriteLine("Statistiques :");
+                sql.AfficherLivraisonsParCuisinier();
+                sql.AfficherCommandesParPeriode(DateTime.Now.AddDays(-7), DateTime.Now);
+                sql.AfficherMoyennePrixCommandes();
+                sql.AfficherMoyenneAchatsClients();
+                sql.AfficherCommandesClientParOrigineEtPeriode(1, "Italienne", DateTime.Now.AddDays(-7), DateTime.Now);
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine("Une erreur s'est produite : " + ex.Message);
+            }
+            finally
+            {
+                // Fermer la connexion
+                sql.Close();
+            }
+
+
+            //string stationsFile = File.ReadAllText("Stations.txt");
+            //string connexionsFile = File.ReadAllText("Connexions.txt");
+            //Dictionary<string, int> rStationsDic = new Dictionary<string, int>();
 
             /// <summary>Récupère les différentes informations sur le métro (stations, connexions, et temps de changement
             /// entre deux stations), et les enregistre dans les structures de données correspondantes. 
@@ -25,18 +150,18 @@ namespace Liv_In_Paris
             /// Ex : commuteTime[1] -> 0.47 (Correspond à connexion[1], il faut 47 secondes pour changer de 'La Defense'
             /// à 'Esplanade de la Defense'.
             /// </summary>
-            List<Node<string>> stations = GetStationsList(stationsFile, rStationsDic);
-            List<List<int>> connexions = GetConnexions(connexionsFile);
-            List<List<double>> commuteTime = GetCommuteTime(connexionsFile);
+            // List<Node<string>> stations = GetStationsList(stationsFile, rStationsDic);
+            // List<List<int>> connexions = GetConnexions(connexionsFile);
+            // List<List<double>> commuteTime = GetCommuteTime(connexionsFile);
 
             /// Instancie le graphe avec les données récupérées.
-            Graph<string> metroGraph = new Graph<string>(connexions, stations, commuteTime, rStationsDic);
+            //Graph<string> metroGraph = new Graph<string>(connexions, stations, commuteTime, rStationsDic);
 
-            Tests<string> t = new Tests<string>(metroGraph);
-            t.TestFunction();
+            //Tests<string> t = new Tests<string>(metroGraph);
+            //t.TestFunction();
 
-            Console.WriteLine("\n\nProgram finished ...");
-            Console.ReadKey();
+            //Console.WriteLine("\n\nProgram finished ...");
+            //Console.ReadKey();
         }
 
         #region Récupération de données

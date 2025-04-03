@@ -70,7 +70,7 @@ namespace Liv_In_Paris
         //  Modifier un client
         public void ModifierClient(int id, string nom, string prenom, string email, string Tel , string Metro_le_plus_proche)
         {
-            string query = "UPDATE Clients SET Nom = @Nom, Prenom = @Prenom, Email = @Email, Adresse = @Adresse WHERE ID_Client = @ID";
+            string query = "UPDATE Clients SET Nom = @Nom, Prenom = @Prenom, Email = @Email, Tel = @Tel , Metro_le_plus_proche = @Metro_le_plus_proche WHERE ID = @ID";
             using (MySqlCommand cmd = new MySqlCommand(query, conn))
             {
                 cmd.Parameters.AddWithValue("@ID", id);
@@ -96,7 +96,7 @@ namespace Liv_In_Paris
         //  Supprimer un client
         public void SupprimerClient(int id)
         {
-            string query = "DELETE FROM Clients WHERE ID_Client = @ID";
+            string query = "DELETE FROM Clients WHERE ID = @ID";
             using (MySqlCommand cmd = new MySqlCommand(query, conn))
             {
                 cmd.Parameters.AddWithValue("@ID", id);
@@ -113,16 +113,16 @@ namespace Liv_In_Paris
         }
 
         //  Afficher tous les clients
-        public void AfficherClients(string critere = "Nom")
+        public void AfficherClients(string critere = "ID")
         {
             string query = $"SELECT * FROM Clients ORDER BY {critere}";
             using (MySqlCommand cmd = new MySqlCommand(query, conn))
             using (MySqlDataReader reader = cmd.ExecuteReader())
             {
-                Console.WriteLine("Liste des clients :");
+               // Console.WriteLine("Liste des clients :");
                 while (reader.Read())
                 {
-                    Console.WriteLine($"{reader["Nom"]} {reader["Prenom"]} ({reader["Email"]})");
+                    Console.WriteLine($" {reader["ID"]}  {reader["Nom"]} {reader["Prenom"]} ({reader["Email"]})");
                 }
             }
         }
@@ -216,18 +216,18 @@ namespace Liv_In_Paris
 
         #region entreprise
 
-        public void AjouterEntreprise(string nomEntreprise, string nomReferent, int id, string metroProche)
+        public void AjouterEntreprise(string nomEntreprise, string nomReferent, int ID, string Metro_le_plus_proche)
         {
             using (MySqlConnection conn = new MySqlConnection(connectionString))
             {
                 conn.Open();
-                string query = "INSERT INTO Entreprise (nom_entreprise, nom_referent, ID, Metro_le_plus_proche) VALUES (@nom, @referent, @id, @metro)";
+                string query = "INSERT INTO Entreprise (nom_entreprise, nom_referent, ID, Metro_le_plus_proche) VALUES (@nom, @referent, @ID, @Metro_le_plus_proche)";
                 using (MySqlCommand cmd = new MySqlCommand(query, conn))
                 {
                     cmd.Parameters.AddWithValue("@nom", nomEntreprise);
                     cmd.Parameters.AddWithValue("@referent", nomReferent);
-                    cmd.Parameters.AddWithValue("@id", id);
-                    cmd.Parameters.AddWithValue("@metro", metroProche);
+                    cmd.Parameters.AddWithValue("@ID", ID);
+                    cmd.Parameters.AddWithValue("@Metro_le_plus_proche", Metro_le_plus_proche);
                     cmd.ExecuteNonQuery();
                 }
             }
@@ -728,26 +728,27 @@ namespace Liv_In_Paris
             }
         }
 
-        public void AfficherCommandesClientParOrigineEtPeriode(int idClient, string originePlat, DateTime dateDebut, DateTime dateFin)
+        public void AfficherCommandesConsomateurParOrigineEtPeriode(int id_consommateur, string originePlat, DateTime dateDebut, DateTime dateFin)
         {
             string query = @"
-        SELECT c.nom, c.prenom, co.id_commande, co.Date_Fabrication, m.origine_plat, m.Nom_plat
-        FROM Commandes co
-        JOIN Consommateur cons ON co.id_consommateur = cons.id_consommateur
-        JOIN compose_commande cc ON co.id_commande = cc.id_commande
-        JOIN mets m ON cc.Id_met = m.Id_met
-        WHERE cons.id_consommateur = @idClient
-        AND m.origine_plat = @originePlat
-        AND co.Date_Fabrication BETWEEN @DateDebut AND @DateFin
-        ORDER BY co.Date_Fabrication DESC;
-    ";
+                            SELECT conso.id_consommateur, com.id_commande, com.Date_Fabrication, m.origine_plat, m.Nom_plat
+                            FROM Commandes com
+                            JOIN Consommateur conso ON com.id_consommateur = conso.id_consommateur
+                  
+                            JOIN compose_commande cc ON com.id_commande = cc.id_commande
+                            JOIN mets m ON cc.Id_met = m.Id_met
+                            WHERE conso.id_consommateur = @id_consommateur
+                            AND m.origine_plat = @originePlat
+                            AND com.Date_Fabrication BETWEEN @DateDebut AND @DateFin
+                            ORDER BY com.Date_Fabrication DESC;
+                             ";
 
             using (var conn = new MySqlConnection(connectionString))
             {
                 conn.Open();
                 using (var cmd = new MySqlCommand(query, conn))
                 {
-                    cmd.Parameters.AddWithValue("@idClient", idClient);
+                    cmd.Parameters.AddWithValue("@id_consommateur", id_consommateur);
                     cmd.Parameters.AddWithValue("@originePlat", originePlat);
                     cmd.Parameters.AddWithValue("@DateDebut", dateDebut);
                     cmd.Parameters.AddWithValue("@DateFin", dateFin);

@@ -675,9 +675,12 @@ namespace Liv_In_Paris
 
                     using (var reader = cmd.ExecuteReader())
                     {
+                        decimal prix;
                         while (reader.Read())
                         {
-                            Console.WriteLine($"Commande ID: {reader["id_commande"]}, Date: {reader["Date_Fabrication"]}, Prix: {reader["Prix"]}");
+                            prix = GetPrixCommande(reader.GetInt32(0));
+
+                            Console.WriteLine($"Commande ID: {reader["id_commande"]}, Date: {reader["Date_Fabrication"]}, Prix: {prix}");
                         }
                     }
                 }

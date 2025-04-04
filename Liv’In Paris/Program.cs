@@ -11,8 +11,8 @@ namespace Liv_In_Paris
         {
             SQL sql = new SQL();
 
-            
-               Console.WriteLine(sql.roleconsommateur(6));
+            sql.AfficherCommandesParPeriode(DateTime.Now.AddDays(-10000), DateTime.Now);
+
 
             //Test_SQL();
 

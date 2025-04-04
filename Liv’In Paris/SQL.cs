@@ -1,6 +1,8 @@
 ﻿using MySql.Data.MySqlClient;
+using MySqlX.XDevAPI.Common;
 using System;
 using System.Collections.Generic;
+using System.ComponentModel.Design;
 using System.Data;
 using System.Linq;
 using System.Text;
@@ -43,7 +45,7 @@ namespace Liv_In_Paris
         #region client
 
         //  Ajouter un client
-        public void AjouterClient(int ID,string nom, string prenom, string email, string Tel,string Metro_le_plus_proche)
+        public void AjouterClient(int ID, string nom, string prenom, string email, string Tel, string Metro_le_plus_proche)
         {
             string query = "INSERT INTO Clients (ID,Nom, Prenom, Email,Tel,Metro_le_plus_proche) VALUES (@ID,@Nom, @Prenom, @Email, @Tel,@Metro_le_plus_proche)";
             using (MySqlCommand cmd = new MySqlCommand(query, conn))
@@ -52,7 +54,7 @@ namespace Liv_In_Paris
                 cmd.Parameters.AddWithValue("@Nom", nom);
                 cmd.Parameters.AddWithValue("@Prenom", prenom);
                 cmd.Parameters.AddWithValue("@Email", email);
-                cmd.Parameters.AddWithValue("@Tel",Tel);
+                cmd.Parameters.AddWithValue("@Tel", Tel);
                 cmd.Parameters.AddWithValue("@Metro_le_plus_proche", Metro_le_plus_proche);
 
                 try
@@ -68,7 +70,7 @@ namespace Liv_In_Paris
         }
 
         //  Modifier un client
-        public void ModifierClient(int id, string nom, string prenom, string email, string Tel , string Metro_le_plus_proche)
+        public void ModifierClient(int id, string nom, string prenom, string email, string Tel, string Metro_le_plus_proche)
         {
             string query = "UPDATE Clients SET Nom = @Nom, Prenom = @Prenom, Email = @Email, Tel = @Tel , Metro_le_plus_proche = @Metro_le_plus_proche WHERE ID = @ID";
             using (MySqlCommand cmd = new MySqlCommand(query, conn))
@@ -77,7 +79,7 @@ namespace Liv_In_Paris
                 cmd.Parameters.AddWithValue("@Nom", nom);
                 cmd.Parameters.AddWithValue("@Prenom", prenom);
                 cmd.Parameters.AddWithValue("@Email", email);
-                cmd.Parameters.AddWithValue("@Tel",Tel);
+                cmd.Parameters.AddWithValue("@Tel", Tel);
                 cmd.Parameters.AddWithValue("@Metro_le_plus_proche", Metro_le_plus_proche);
 
 
@@ -119,7 +121,7 @@ namespace Liv_In_Paris
             using (MySqlCommand cmd = new MySqlCommand(query, conn))
             using (MySqlDataReader reader = cmd.ExecuteReader())
             {
-               // Console.WriteLine("Liste des clients :");
+                // Console.WriteLine("Liste des clients :");
                 while (reader.Read())
                 {
                     Console.WriteLine($" {reader["ID"]}  {reader["Nom"]} {reader["Prenom"]} ({reader["Email"]})");
@@ -522,16 +524,15 @@ namespace Liv_In_Paris
 
         #region relatif commande 
 
-        public void AjouterCommande(int prix, int quantite, DateTime fabrication, DateTime peremption, int idConsommateur, int idCuisinier)
+        public void AjouterCommande(DateTime fabrication, DateTime peremption, int idConsommateur, int idCuisinier)
         {
             using (MySqlConnection conn = new MySqlConnection(connectionString))
             {
                 conn.Open();
-                string query = "INSERT INTO Commandes (Prix, Quantite, Date_Fabrication, Date_Peremption, id_consommateur, id_cuisinier) VALUES (@prix, @quantite, @fabrication, @peremption, @idConsommateur, @idCuisinier)";
+                string query = "INSERT INTO Commandes ( Date_Fabrication, Date_Peremption, id_consommateur, id_cuisinier) VALUES ( @fabrication, @peremption, @idConsommateur, @idCuisinier)";
                 using (MySqlCommand cmd = new MySqlCommand(query, conn))
                 {
-                    cmd.Parameters.AddWithValue("@prix", prix);
-                    cmd.Parameters.AddWithValue("@quantite", quantite);
+                    
                     cmd.Parameters.AddWithValue("@fabrication", fabrication);
                     cmd.Parameters.AddWithValue("@peremption", peremption);
                     cmd.Parameters.AddWithValue("@idConsommateur", idConsommateur);
@@ -540,23 +541,23 @@ namespace Liv_In_Paris
                 }
             }
         }
-
-        public void ModifierCommande(int idCommande, int prix, int quantite)
-        {
-            using (MySqlConnection conn = new MySqlConnection(connectionString))
-            {
-                conn.Open();
-                string query = "UPDATE Commandes SET Prix=@prix, Quantite=@quantite WHERE id_commande=@idCommande";
-                using (MySqlCommand cmd = new MySqlCommand(query, conn))
-                {
-                    cmd.Parameters.AddWithValue("@prix", prix);
-                    cmd.Parameters.AddWithValue("@quantite", quantite);
-                    cmd.Parameters.AddWithValue("@idCommande", idCommande);
-                    cmd.ExecuteNonQuery();
-                }
-            }
-        }
-
+        
+        //public void ModifierCommande(int idCommande, int prix, int quantite)
+        //{
+        //    using (MySqlConnection conn = new MySqlConnection(connectionString))
+        //    {
+        //        conn.Open();
+        //        string query = "UPDATE Commandes SET Prix=@prix, Quantite=@quantite WHERE id_commande=@idCommande";
+        //        using (MySqlCommand cmd = new MySqlCommand(query, conn))
+        //        {
+        //            cmd.Parameters.AddWithValue("@prix", prix);
+        //            cmd.Parameters.AddWithValue("@quantite", quantite);
+        //            cmd.Parameters.AddWithValue("@idCommande", idCommande);
+        //            cmd.ExecuteNonQuery();
+        //        }
+        //    }
+        //}
+        
         public void SupprimerCommande(int idCommande)
         {
             using (MySqlConnection conn = new MySqlConnection(connectionString))
@@ -583,7 +584,7 @@ namespace Liv_In_Paris
                 {
                     while (reader.Read())
                     {
-                        commandes.Add($"Commande ID: {reader["id_commande"]}, Prix: {reader["Prix"]}, Quantité: {reader["Quantite"]}");
+                        commandes.Add($"Commande ID: {reader["id_commande"]}");
                     }
                 }
             }
@@ -685,50 +686,30 @@ namespace Liv_In_Paris
 
         public void AfficherMoyennePrixCommandes()
         {
-            string query = "SELECT AVG(Prix) AS moyenne_prix FROM Commandes";
-
-            using (var conn = new MySqlConnection(connectionString))
-            {
-                conn.Open();
-                using (var cmd = new MySqlCommand(query, conn))
-                using (var reader = cmd.ExecuteReader())
-                {
-                    if (reader.Read())
-                    {
-                        double moyennePrix = Convert.ToDouble(reader["moyenne_prix"]);
-                        Console.WriteLine($"La moyenne des prix des commandes est : {moyennePrix}€");
-                    }
-                }
-            }
-        }
-
-        public void AfficherMoyenneAchatsClients()
-        {
             string query = @"
-        SELECT AVG(total_achats) AS moyenne_achats
+        SELECT AVG(total) 
         FROM (
-            SELECT SUM(Prix) AS total_achats
-            FROM Commandes
-            GROUP BY id_consommateur
-        ) AS achats_clients;
-    ";
+            SELECT SUM(m.Prix * cc.Quantite) AS total
+            FROM compose_commande cc
+            JOIN mets m ON cc.Id_met = m.Id_met
+            GROUP BY cc.id_commande
+        ) AS sous_requete;";
 
             using (var conn = new MySqlConnection(connectionString))
             {
                 conn.Open();
                 using (var cmd = new MySqlCommand(query, conn))
-                using (var reader = cmd.ExecuteReader())
                 {
-                    if (reader.Read())
-                    {
-                        double moyenneAchats = Convert.ToDouble(reader["moyenne_achats"]);
-                        Console.WriteLine($"La moyenne des achats des clients est : {moyenneAchats}€");
-                    }
+                    var result = cmd.ExecuteScalar();
+                    double moyennePrix = (result != null) ? Convert.ToDouble(result) : 0;
+                    Console.WriteLine($"Moyenne des prix des commandes : {moyennePrix}€");
                 }
             }
         }
 
-        public void AfficherCommandesConsomateurParOrigineEtPeriode(int id_consommateur, string originePlat, DateTime dateDebut, DateTime dateFin)
+       
+
+        public void AfficherCommandesConsomateurParOrigineEtPeriode(int id_consommateur, string originePlat, DateTime dateDebut, DateTime dateFin) // jsps si ca marche bien 
         {
             string query = @"
                             SELECT conso.id_consommateur, com.id_commande, com.Date_Fabrication, m.origine_plat, m.Nom_plat
@@ -757,7 +738,7 @@ namespace Liv_In_Paris
                     {
                         while (reader.Read())
                         {
-                            Console.WriteLine($"Commande ID: {reader["id_commande"]}, Plat: {reader["Nom_plat"]}, Origine: {reader["origine_plat"]}, Date: {reader["Date_Fabrication"]}");
+                            Console.WriteLine($"Plat: {reader["Nom_plat"]}, Origine: {reader["origine_plat"]}, Date: {reader["Date_Fabrication"]}");
                         }
                     }
                 }
@@ -768,7 +749,168 @@ namespace Liv_In_Paris
 
         #endregion
 
-        #region idée a trouver_
+
+
+        #region fonction pas test
+
+        public decimal GetPrixCommande(int commandeId)
+        {
+            decimal prixTotal = 0m;
+
+            using (MySqlConnection conn = new MySqlConnection(connectionString))
+            {
+                conn.Open();
+                string query = @"
+                SELECT COALESCE(SUM(m.Prix * cc.Quantite), 0) AS prix_total
+                FROM compose_commande cc
+                JOIN mets m ON cc.Id_met = m.Id_met
+                WHERE cc.id_commande = @commandeId;";
+
+                using (MySqlCommand cmd = new MySqlCommand(query, conn))
+                {
+                    cmd.Parameters.AddWithValue("@commandeId", commandeId);
+
+                    var result = cmd.ExecuteScalar();
+                    prixTotal = (result != DBNull.Value && result != null) ? Convert.ToDecimal(result) : 0m;
+                }
+            }
+
+            return prixTotal;
+        }
+
+        public int DernierID()
+        {
+            int nb = 1;
+            //conn.Open();
+
+            string query = @"SELECT ID FROM Compte";
+
+            using (MySqlCommand cmd = new MySqlCommand(query, conn))
+            using (MySqlDataReader reader = cmd.ExecuteReader())
+            {
+                while (reader.Read())
+                {
+                    if (reader.GetInt32(0) > nb)
+                    {
+                        nb = reader.GetInt32(0);
+                    }
+                }
+                return nb;
+            }
+        }
+
+
+
+        public int Dernieridcuisto()
+        {
+            int nb = 0;
+            //conn.Open();
+
+            string query = @"SELECT id_cuisinier FROM cuisinier";
+
+            using (MySqlCommand cmd = new MySqlCommand(query, conn))
+            using (MySqlDataReader reader = cmd.ExecuteReader())
+            {
+                while (reader.Read())
+                {
+                    if (reader.GetInt32(0) > nb)
+                    {
+                        nb = reader.GetInt32(0);
+                    }
+                }
+                return nb;
+            }
+        }
+
+        public int Dernieridconsomateur() // pas test
+        {
+            int nb = 0;
+            //conn.Open();
+
+            string query = @"SELECT id_consommateur FROM Consommateur";
+
+            using (MySqlCommand cmd = new MySqlCommand(query, conn))
+            using (MySqlDataReader reader = cmd.ExecuteReader())
+            {
+                while (reader.Read())
+                {
+                    if (reader.GetInt32(0) > nb)
+                    {
+                        nb = reader.GetInt32(0);
+                    }
+                }
+                return nb;
+            }
+        }
+
+        public int DernierId_commande()
+        {
+            int nb = 0;
+            //conn.Open();
+
+            string query = @"SELECT id_commande FROM Commandes";
+
+            using (MySqlCommand cmd = new MySqlCommand(query, conn))
+            using (MySqlDataReader reader = cmd.ExecuteReader())
+            {
+                while (reader.Read())
+                {
+                    if (reader.GetInt32(0) > nb)
+                    {
+                        nb = reader.GetInt32(0);
+                    }
+                }
+                return nb;
+            }
+        }
+
+        public bool rolecuisinier(int ID)
+        {
+            bool result = false;
+            string query = @"Select ID from cuisinier";
+            int dernierID = DernierID();
+            int dernieridcuisto = Dernieridcuisto();
+
+            using (MySqlCommand cmd = new MySqlCommand(query, conn))
+            using (MySqlDataReader reader = cmd.ExecuteReader())
+            {
+                int i = 0;
+                while ((reader.Read() || result) && i < dernierID -1 && i < dernieridcuisto-1)
+                {
+                    if ( reader.GetInt32(0) == ID)
+                    {
+                        result = true;
+                    }
+                    i++;
+                }
+                return result;
+            }
+        }
+
+
+        public bool roleconsommateur(int ID)
+        {
+            bool result = false;
+            string query = @"Select ID from Consommateur";
+            int dernierID = DernierID();
+            int dernieridcuisto = Dernieridconsomateur();
+
+            using (MySqlCommand cmd = new MySqlCommand(query, conn))
+            using (MySqlDataReader reader = cmd.ExecuteReader())
+            {
+                int i = 0;
+                while ((reader.Read() || result) && i < dernierID - 1 && i < dernieridcuisto - 1)
+                {
+                    if (reader.GetInt32(0) == ID)
+                    {
+                        result = true;
+                    }
+                    i++;
+                }
+                return result;
+            }
+        }
+
         #endregion
     }
 }

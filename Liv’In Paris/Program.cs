@@ -9,8 +9,12 @@ namespace Liv_In_Paris
     {
         static void Main(string[] args)
         {
+            SQL sql = new SQL();
 
-            test();
+            
+               Console.WriteLine(sql.roleconsommateur(6));
+
+            //Test_SQL();
 
             //string stationsFile = File.ReadAllText("Stations.txt");
             //string connexionsFile = File.ReadAllText("Connexions.txt");
@@ -36,14 +40,12 @@ namespace Liv_In_Paris
             //Graph<string> metroGraph = new Graph<string>(connexions, stations, commuteTime, rStationsDic);
 
             //Tests<string> t = new Tests<string>(metroGraph);
-            //t.TestFunction();
 
             //Console.WriteLine("\n\nProgram finished ...");
             //Console.ReadKey();
         }
 
-
-        static void test()
+        public static void Test_SQL()
         {
             SQL sql = new SQL();
 
@@ -59,7 +61,7 @@ namespace Liv_In_Paris
 
                 // Ajouter un client
                 Console.WriteLine("Ajout d'un client...");
-                sql.AjouterClient(1, "Doe", "John", "john.doe@example.com", "0768243263", "chatelet");
+                sql.AjouterClient(sql.DernierID() , "Doe", "John", "john.doe@example.com", "0768243263", "chatelet");
 
                 // Afficher tous les clients
                 Console.WriteLine("Liste des clients :");
@@ -67,7 +69,7 @@ namespace Liv_In_Paris
 
                 // Modifier un client
                 Console.WriteLine("Modification d'un client...");
-                sql.ModifierClient(1, "Smith", "Jane", "jane.smith@example.com", "0768243263", "chatelet");
+                sql.ModifierClient(sql.DernierID() , "Smith", "Jane", "jane.smith@example.com", "0768243263", "chatelet");
 
                 // Afficher tous les clients après modification
                 Console.WriteLine("Liste des clients après modification :");
@@ -75,7 +77,7 @@ namespace Liv_In_Paris
 
                 // Supprimer un client
                 Console.WriteLine("Suppression d'un client...");
-                sql.SupprimerClient(1);
+                sql.SupprimerClient(sql.DernierID());
 
                 // Afficher tous les clients après suppression
                 Console.WriteLine("Liste des clients après suppression :");
@@ -85,7 +87,7 @@ namespace Liv_In_Paris
 
                 // Ajouter une entreprise
                 Console.WriteLine("Ajout d'une entreprise...");
-                sql.AjouterEntreprise("Entreprise Test", "Referent Test", 1, "Station B");
+                sql.AjouterEntreprise("Entreprise Test", "Referent Test", sql.DernierID(), "Station B");
 
                 // Afficher toutes les entreprises
                 Console.WriteLine("Liste des entreprises :");
@@ -93,24 +95,26 @@ namespace Liv_In_Paris
 
                 //on supp tout pour repartir sur une meilleur base pour la suite
 
-               sql.SupprimerEntreprise( "Entreprise Test" );
+                sql.SupprimerEntreprise("Entreprise Test");
 
 
                 // ------------------------------------
                 // on pose les base pour les prochains test :
+                sql.AjouterClient(sql.DernierID() , "alex", "fath", "alex@example.com", "0768243263", "chatelet");
                 // Ajouter un compte
+
                 Console.WriteLine("Ajout d'un compte...");
                 sql.AjouterCompte("azerty", true);
 
-                sql.AjouterClient(1, "alex", "fath", "alex@example.com", "0768243263", "chatelet");
-                sql.AjouterClient(2, "Matthieu", "fecamp", "matt@example.com", "0768243263", "la defense");
+               
+                sql.AjouterClient(sql.DernierID(), "Matthieu", "fecamp", "matt@example.com", "0768243263", "la defense");
 
 
 
 
                 // Ajouter un consommateur
                 Console.WriteLine("Ajout d'un consommateur...");
-                sql.AjouterConsommateur(1);
+                sql.AjouterConsommateur(sql.DernierID() -1);
 
                 // Afficher tous les consommateurs
                 Console.WriteLine("Liste des consommateurs :");
@@ -118,7 +122,7 @@ namespace Liv_In_Paris
 
                 // Ajouter un cuisinier
                 Console.WriteLine("Ajout d'un cuisinier...");
-                sql.AjouterCuisinier("Chef A", 2);
+                sql.AjouterCuisinier("Chef A", sql.DernierID() );
 
                 // Afficher tous les cuisiniers
                 Console.WriteLine("Liste des cuisiniers :");
@@ -134,7 +138,7 @@ namespace Liv_In_Paris
 
                 // Ajouter un plat
                 Console.WriteLine("Ajout d'un plat...");
-                sql.AjouterMet("Pizza", 10, "Plat principal", "Végétarien", "Italienne", 1 , 1);
+                sql.AjouterMet("Pizza", 10, "Plat principal", "Végétarien", "Italienne", 1, 1);
 
                 // Associer un ingrédient à un plat
                 Console.WriteLine("Association d'un ingrédient à un plat...");
@@ -150,7 +154,7 @@ namespace Liv_In_Paris
 
                 // Ajouter une commande
                 Console.WriteLine("Ajout d'une commande...");
-                sql.AjouterCommande(20, 1, DateTime.Now, DateTime.Now.AddDays(5), 1, 1);
+                sql.AjouterCommande( DateTime.Now, DateTime.Now.AddDays(5), 1, 1);
 
                 // Afficher toutes les commandes
                 Console.WriteLine("Liste des commandes :");
@@ -162,11 +166,11 @@ namespace Liv_In_Paris
 
                 // Ajouter un plat dans une commande
                 Console.WriteLine("Ajout d'un plat dans une commande...");
-                sql.AjouterPlatDansCommande(1, 1, 1);
+                sql.AjouterPlatDansCommande(sql.DernierId_commande(), 1, 2);
 
                 // Afficher toutes les commandes
                 Console.WriteLine("Liste des commandes :");
-                
+
                 foreach (var commande in commandes)
                 {
                     Console.WriteLine(commande);
@@ -174,14 +178,14 @@ namespace Liv_In_Paris
 
                 // Noter une commande
                 Console.WriteLine("Noter une commande...");
-                sql.NoterCommande(1, 1, 1, 2, "manque dingredient cest un peu simple non ?", 4, "Merci");
+                sql.NoterCommande(sql.DernierId_commande(), 1, 1, 2, "manque dingredient cest un peu simple non ?", 4, "Merci");
 
                 // Afficher des statistiques
                 Console.WriteLine("Statistiques :");
                 sql.AfficherLivraisonsParCuisinier();
                 sql.AfficherCommandesParPeriode(DateTime.Now.AddDays(-7), DateTime.Now);
                 sql.AfficherMoyennePrixCommandes();
-                sql.AfficherMoyenneAchatsClients();
+                
                 sql.AfficherCommandesConsomateurParOrigineEtPeriode(1, "Italienne", DateTime.Now.AddDays(-7), DateTime.Now);
             }
             catch (Exception ex)
@@ -194,6 +198,7 @@ namespace Liv_In_Paris
                 sql.Close();
             }
         }
+
 
 
 

@@ -89,7 +89,7 @@ namespace Liv_In_Paris
             Separator();
             Separator();
 
-            List<int> dijkstraPath, bellmanFordPath;
+            List<int> dijkstraPath, bellmanFordPath, floydWarshallPath;
             Console.WriteLine("\nPlus court chemin de République à Saint-Mandé : (Dijkstra)\n");
             dijkstraPath = testGraph.Dijkstra(67, 23); /// Applique l'algorithme de Dijkstra
             displayPathInfo(dijkstraPath);
@@ -111,6 +111,18 @@ namespace Liv_In_Paris
             Console.WriteLine("\nPlus court chemin de La Défense à Château de Vincennes : (Bellman-Ford)\n");
             bellmanFordPath = testGraph.BellmanFord(1, 25);
             displayPathInfo(bellmanFordPath);
+
+            Separator();
+
+            Console.WriteLine("\nPlus court chemin de République à Saint-Mandé : (Floyd-Warshall)\n");
+            floydWarshallPath = testGraph.FloydWarshall(67, 23); /// Applique Floyd-Warshall
+            displayPathInfo(floydWarshallPath);
+
+            Separator();
+
+            Console.WriteLine("\nPlus court chemin de La Défense à Château de Vincennes : (Floyd-Warshall)\n");
+            floydWarshallPath = testGraph.FloydWarshall(1, 25);
+            displayPathInfo(floydWarshallPath);
         }
 
 

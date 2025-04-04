@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
@@ -23,57 +24,51 @@ namespace Liv_In_Paris
 
             try
             {
-                // Exemple d'utilisation des fonctions
 
 
-
-                // Ajouter un compte
+                /// Ajouter un compte
                 Console.WriteLine("Ajout d'un compte...");
                 sql.AjouterCompte("securepassword", true);
 
-                // Ajouter un client
+                /// Ajouter un client
                 Console.WriteLine("Ajout d'un client...");
                 sql.AjouterClient(sql.DernierID(), "Doe", "John", "john.doe@example.com", "0768243263", "chatelet");
 
-                // Afficher tous les clients
+                /// Afficher tous les clients
                 Console.WriteLine("Liste des clients :");
                 sql.AfficherClients();
 
-                // Modifier un client
+                /// Modifier un client
                 Console.WriteLine("Modification d'un client...");
                 sql.ModifierClient(sql.DernierID(), "Smith", "Jane", "jane.smith@example.com", "0768243263", "chatelet");
 
-                // Afficher tous les clients après modification
+                /// Afficher tous les clients après modification
                 Console.WriteLine("Liste des clients après modification :");
                 sql.AfficherClients();
 
-                // Supprimer un client
+                /// Supprimer un client
                 Console.WriteLine("Suppression d'un client...");
                 sql.SupprimerClient(sql.DernierID());
 
-                // Afficher tous les clients après suppression
+                /// Afficher tous les clients après suppression
                 Console.WriteLine("Liste des clients après suppression :");
                 sql.AfficherClients();
 
-                // -------------------------------------
-
-                // Ajouter une entreprise
+                /// Ajouter une entreprise
                 Console.WriteLine("Ajout d'une entreprise...");
                 sql.AjouterEntreprise("Entreprise Test", "Referent Test", sql.DernierID(), "Station B");
 
-                // Afficher toutes les entreprises
+                /// Afficher toutes les entreprises
                 Console.WriteLine("Liste des entreprises :");
                 sql.AfficherEntreprises("nom_entreprise");
 
-                //on supp tout pour repartir sur une meilleur base pour la suite
+                ///on supp tout pour repartir sur une meilleur base pour la suite
 
                 sql.SupprimerEntreprise("Entreprise Test");
 
-
-                // ------------------------------------
-                // on pose les base pour les prochains test :
+                /// on pose les base pour les prochains test :
                 sql.AjouterClient(sql.DernierID(), "alex", "fath", "alex@example.com", "0768243263", "chatelet");
-                // Ajouter un compte
+                /// Ajouter un compte
 
                 Console.WriteLine("Ajout d'un compte...");
                 sql.AjouterCompte("azerty", true);
@@ -84,19 +79,19 @@ namespace Liv_In_Paris
 
 
 
-                // Ajouter un consommateur
+                /// Ajouter un consommateur
                 Console.WriteLine("Ajout d'un consommateur...");
                 sql.AjouterConsommateur(sql.DernierID() - 1);
 
-                // Afficher tous les consommateurs
+                /// Afficher tous les consommateurs
                 Console.WriteLine("Liste des consommateurs :");
                 sql.AfficherConsommateurs("id_consommateur");
 
-                // Ajouter un cuisinier
+                /// Ajouter un cuisinier
                 Console.WriteLine("Ajout d'un cuisinier...");
                 sql.AjouterCuisinier("Chef A", sql.DernierID());
 
-                // Afficher tous les cuisiniers
+                /// Afficher tous les cuisiniers
                 Console.WriteLine("Liste des cuisiniers :");
                 var cuisiniers = sql.AfficherCuisiniers();
                 foreach (var cuisinier in cuisiniers)
@@ -104,19 +99,19 @@ namespace Liv_In_Paris
                     Console.WriteLine(cuisinier);
                 }
 
-                // Ajouter un ingrédient
+                /// Ajouter un ingrédient
                 Console.WriteLine("Ajout d'un ingrédient...");
                 sql.AjouterIngredient("Tomate");
 
-                // Ajouter un plat
+                /// Ajouter un plat
                 Console.WriteLine("Ajout d'un plat...");
                 sql.AjouterMet("Pizza", 10, "Plat principal", "Végétarien", "Italienne", 1, 1);
 
-                // Associer un ingrédient à un plat
+                /// Associer un ingrédient à un plat
                 Console.WriteLine("Association d'un ingrédient à un plat...");
                 sql.AssocierIngredientAMet(1, "Tomate");
 
-                // Afficher les ingrédients d'un plat
+                /// Afficher les ingrédients d'un plat
                 Console.WriteLine("Ingrédients du plat :");
                 var ingredients = sql.AfficherIngredientsParPlat(1);
                 foreach (var ingredient in ingredients)
@@ -124,11 +119,11 @@ namespace Liv_In_Paris
                     Console.WriteLine(ingredient);
                 }
 
-                // Ajouter une commande
+                /// Ajouter une commande
                 Console.WriteLine("Ajout d'une commande...");
                 sql.AjouterCommande(DateTime.Now, DateTime.Now.AddDays(5), 1, 1);
 
-                // Afficher toutes les commandes
+                /// Afficher toutes les commandes
                 Console.WriteLine("Liste des commandes :");
                 var commandes = sql.AfficherCommandes();
                 foreach (var commande in commandes)
@@ -136,11 +131,11 @@ namespace Liv_In_Paris
                     Console.WriteLine(commande);
                 }
 
-                // Ajouter un plat dans une commande
+                /// Ajouter un plat dans une commande
                 Console.WriteLine("Ajout d'un plat dans une commande...");
                 sql.AjouterPlatDansCommande(sql.DernierId_commande(), 1, 2);
 
-                // Afficher toutes les commandes
+                /// Afficher toutes les commandes
                 Console.WriteLine("Liste des commandes :");
 
                 foreach (var commande in commandes)
@@ -148,11 +143,11 @@ namespace Liv_In_Paris
                     Console.WriteLine(commande);
                 }
 
-                // Noter une commande
+                /// Noter une commande
                 Console.WriteLine("Noter une commande...");
                 sql.NoterCommande(sql.DernierId_commande(), 1, 1, 2, "manque dingredient cest un peu simple non ?", 4, "Merci");
 
-                // Afficher des statistiques
+                /// Afficher des statistiques
                 Console.WriteLine("Statistiques :");
                 sql.AfficherLivraisonsParCuisinier();
                 sql.AfficherCommandesParPeriode(DateTime.Now.AddDays(-7), DateTime.Now);
@@ -166,7 +161,7 @@ namespace Liv_In_Paris
             }
             finally
             {
-                // Fermer la connexion
+                /// Fermer la connexion
                 sql.Close();
             }
         }
@@ -220,8 +215,9 @@ namespace Liv_In_Paris
 
         public void TestFunction()
         {
+            Stopwatch sw = new Stopwatch();
 
-            Console.WriteLine("\nDFS test : ");
+            Console.WriteLine("Tests Graphe ...\nDFS test : ");
             List<int> DFSNodes = new List<int>(); /// La fonction DFS remplit une liste de noeuds
             testGraph.DFS(DFSNodes);
             foreach (int i in DFSNodes)
@@ -246,38 +242,64 @@ namespace Liv_In_Paris
 
             List<int> dijkstraPath, bellmanFordPath, floydWarshallPath;
             Console.WriteLine("\nPlus court chemin de République à Saint-Mandé : (Dijkstra)\n");
+            sw.Start();
             dijkstraPath = testGraph.Dijkstra(67, 23); /// Applique l'algorithme de Dijkstra
+            sw.Stop();
             displayPathInfo(dijkstraPath);
+            Console.WriteLine(sw.Elapsed);
+            sw.Reset();
 
             Separator();
 
             Console.WriteLine("\nPlus court chemin de Porte de La Défense à Châteu de Vincennes : (Dijkstra)\n");
+            sw.Start();
             dijkstraPath = testGraph.Dijkstra(1, 25);
+            sw.Stop();
             displayPathInfo(dijkstraPath);
+            Console.WriteLine(sw.Elapsed);
+            sw.Reset();
 
             Separator();
 
             Console.WriteLine("\nPlus court chemin de République à Saint-Mandé : (Bellman-Ford)\n");
+            sw.Start();
             bellmanFordPath = testGraph.BellmanFord(67, 23); /// Applique Bellman-Ford
+            sw.Stop();
             displayPathInfo(bellmanFordPath);
+            Console.WriteLine(sw.Elapsed);
+            sw.Reset();
 
             Separator();
 
             Console.WriteLine("\nPlus court chemin de La Défense à Château de Vincennes : (Bellman-Ford)\n");
+            sw.Start();
             bellmanFordPath = testGraph.BellmanFord(1, 25);
+            sw.Stop();
             displayPathInfo(bellmanFordPath);
+            Console.WriteLine(sw.Elapsed);
+            sw.Reset();
 
             Separator();
 
             Console.WriteLine("\nPlus court chemin de République à Saint-Mandé : (Floyd-Warshall)\n");
+            sw.Start();
             floydWarshallPath = testGraph.FloydWarshall(67, 23); /// Applique Floyd-Warshall
+            sw.Stop();
             displayPathInfo(floydWarshallPath);
+            Console.WriteLine(sw.Elapsed);
+            sw.Reset();
 
             Separator();
 
             Console.WriteLine("\nPlus court chemin de La Défense à Château de Vincennes : (Floyd-Warshall)\n");
+            sw.Start();
             floydWarshallPath = testGraph.FloydWarshall(1, 25);
+            sw.Stop();
             displayPathInfo(floydWarshallPath);
+            Console.WriteLine(sw.Elapsed);
+            sw.Reset();
+
+            Separator();
         }
 
 

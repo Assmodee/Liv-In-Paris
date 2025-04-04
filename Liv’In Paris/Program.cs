@@ -1,4 +1,5 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using System.ComponentModel;
 using System.Diagnostics;
 using System.Drawing;
@@ -12,7 +13,9 @@ namespace Liv_In_Paris
     {
         static void Main(string[] args)
         {
-            SQL sQL = new SQL();   
+            SQL sql = new SQL();
+
+           
 
             string stationsFile = File.ReadAllText("Stations.txt");
             string connexionsFile = File.ReadAllText("Connexions.txt");
@@ -38,8 +41,13 @@ namespace Liv_In_Paris
             Graph<string> metroGraph = new Graph<string>(connexions, stations, commuteTime, rStationsDic);
 
             Tests<string> t = new Tests<string>(metroGraph);
-            ///t.TestFunction();
-            /// t.Test_SQL();
+            t.TestFunction();
+            Console.WriteLine("Tests SQL ...\n");
+            t.Test_SQL();
+            Console.WriteLine("\nTests SQL terminés, la prochaine partie concerne l'interaction avec l'application. Appuyer pour continuer ...");
+            Console.ReadKey();
+
+            menu1(sql, metroGraph);
 
             Drawing.DrawGraphFromCoordinates(stations, connexions, "graphe_oriente.png");
 
@@ -66,6 +74,7 @@ namespace Liv_In_Paris
                         stationName += c;
                     }
                 }
+                stationName.ToLower();
 
 
                 double lon = -1.0;
@@ -173,7 +182,7 @@ namespace Liv_In_Paris
             {
                 
 
-                //Connect();
+                Connect(sql);
             }
 
         }
@@ -194,6 +203,7 @@ namespace Liv_In_Paris
 
                 Console.WriteLine(" etes vous un utilisateur (true) ou une entreprise (false):");
                 estUtilisateur = Convert.ToBoolean(Console.ReadLine());
+                sql.AjouterCompte(mdp, estUtilisateur);
 
                 if (estUtilisateur == true)
                 {
@@ -218,16 +228,18 @@ namespace Liv_In_Paris
                         correct = int.TryParse(Tel, out response);
 
                     } while (!correct);
-                    do
-                    {
+                    //do
+                    //{
                         Console.WriteLine("Station de metro la plus proche:");
-                        Metro_le_plus_proche= Console.ReadLine();
+                        Metro_le_plus_proche = Console.ReadLine().ToLower();
 
-                    } while (stationsGraph.ReverseIdDic.Keys.Contains(Metro_le_plus_proche));
+                    
+                    //} while (stationsGraph.ReverseIdDic.Keys.Contains(Metro_le_plus_proche));
 
 
 
                     sql.AjouterClient(sql.DernierID(), nom, prenom, email, Tel, Metro_le_plus_proche);
+
                     test = true;
                 }
                 else
@@ -237,27 +249,30 @@ namespace Liv_In_Paris
                     nomEntreprise = Console.ReadLine();
                     Console.WriteLine("nom referent :");
                     nomReferent = Console.ReadLine();
-                    do
-                    {
+                    //do
+                    //{
                         Console.WriteLine("Station de metro la plus proche:");
-                        Metro_le_plus_proche = Console.ReadLine();
+                        Metro_le_plus_proche = Console.ReadLine().ToLower();
 
-                    } while (stationsGraph.ReverseIdDic.Keys.Contains(Metro_le_plus_proche));
+                    //} while (stationsGraph.ReverseIdDic.Keys.Contains(Metro_le_plus_proche));
 
                     sql.AjouterEntreprise(nomEntreprise,nomReferent, sql.DernierID(), Metro_le_plus_proche);
                     test = true;
                 }
 
 
-            } while (test);
+            } while (!test);
 
+            Console.WriteLine(sql.DernierID());
+            Console.ReadLine();
 
+            menu1(sql, stationsGraph);
         }
 
         static void Connect(SQL sql)
         {
             Console.Clear();
-            int ID;
+            int ID=0;
             string verif;
             bool correct = false;
             string mdp = "";
@@ -271,14 +286,14 @@ namespace Liv_In_Paris
                     Console.WriteLine("ID :");
                     verif = Console.ReadLine();
 
-                } while (int.TryParse(verif, out ID));
+                } while (!int.TryParse(verif, out ID));
 
                 Console.WriteLine("mot de passe :");
                 mdp = Console.ReadLine();
 
                 existe = sql.VerifierCompte(ID, mdp);
 
-            } while (existe);
+            } while (!existe);
 
             Menu2(sql,ID);
 
@@ -290,23 +305,24 @@ namespace Liv_In_Paris
             Console.Clear();
             bool est_cuisinier = sql.rolecuisinier(ID);
             bool est_consommateur = sql.roleconsommateur(ID);
+            
 
-            if(est_cuisinier == false && est_consommateur == false) // ni consomateur ni cuisinier  Menu00
+            if (est_cuisinier == false && est_consommateur == false) /// ni consomateur ni cuisinier  Menu00
             {
              Menu00(sql,ID);
             }
 
-            if (est_cuisinier == true && est_consommateur == false) // que cuisinier  Menu10
+            if (est_cuisinier == true && est_consommateur == false) /// que cuisinier  Menu10
             {
                 Menu10(sql,ID);
             }
 
-            if (est_cuisinier == false && est_consommateur == true) // que client       Menu01
+            if (est_cuisinier == false && est_consommateur == true) /// que client       Menu01
             {
                 Menu01(sql,ID);
             }
 
-            if (est_cuisinier == true && est_consommateur == true) // les deux      Menu11
+            if (est_cuisinier == true && est_consommateur == true) /// les deux      Menu11
             {
                 Menu11(sql,ID);
             }
@@ -317,7 +333,7 @@ namespace Liv_In_Paris
 
         static void Menu00(SQL sql, int ID)
         {
-            Console.Clear();   
+              
             string display = "[1] devenir cuisinier: \n[2]devenir consommateur:";
             int action = 0;
             do {
@@ -328,10 +344,12 @@ namespace Liv_In_Paris
             if (action == 1)
             {
                 devenirCuisinier( sql,  ID);
+                Menu2(sql, ID);
             }
             if (action == 2)
             {
                 devenirConsommateur( sql,  ID);
+                Menu2(sql, ID);
             }
 
         }
@@ -353,6 +371,7 @@ namespace Liv_In_Paris
             {
                 sql.AfficherTousLesMets();
                 Console.WriteLine("retour appuyer entrer");
+                Console.ReadLine();
                 Menu2(sql, ID);
 
             }
@@ -364,12 +383,14 @@ namespace Liv_In_Paris
 
                 sql.ChercherEtAfficherPlat(nomplat);
                 Console.WriteLine("retour appuyer entrer");
+                Console.ReadLine();
                 Menu2(sql, ID);
             }
             if (action == 3)
             {
                 sql.AfficherCommandesParCompte(ID);
                 Console.WriteLine("retour appuyer entrer");
+                Console.ReadLine();
                 Menu2(sql, ID);
 
             }
@@ -395,6 +416,7 @@ namespace Liv_In_Paris
 
                 sql.AjouterPlatDansCommande(idCommande,idMet,quantite);
                 Console.WriteLine("retour appuyer entrer");
+                Console.ReadLine();
                 Menu2(sql, ID);
 
             }
@@ -407,13 +429,13 @@ namespace Liv_In_Paris
                 } while (!DateTime.TryParse(Console.ReadLine(), out fabrication));
 
          
-                // Demande l'ID du consommateur
+               /// Demande l'ID du consommateur
                 do
                 {
                     Console.Write(" Entrez l'ID du consommateur : ");
                 } while (!int.TryParse(Console.ReadLine(), out idConsommateur));
 
-                // Demande l'ID du cuisinier
+                /// Demande l'ID du cuisinier
                 do
                 {
                     Console.Write(" Entrez l'ID du cuisinier : ");
@@ -431,10 +453,7 @@ namespace Liv_In_Paris
                 for (int i = 0; i < nb; i++)
                 {
 
-                    do
-                    {
-                        Console.Write("Entrez l'ID de la commande : ");
-                    } while (!int.TryParse(Console.ReadLine(), out idCommande));
+                    
 
                     do
                     {
@@ -452,6 +471,7 @@ namespace Liv_In_Paris
 
                 }
                 Console.WriteLine("retour appuyer entrer");
+                Console.ReadLine();
                 Menu2(sql, ID);
 
             }
@@ -464,13 +484,13 @@ namespace Liv_In_Paris
                     Console.Write(" Entrez l'ID de la commande : ");
                 } while (!int.TryParse(Console.ReadLine(), out idCommande));
 
-                // Demande l'ID du cuisinier
+                /// Demande l'ID du cuisinier
                 do
                 {
                     Console.Write(" Entrez l'ID du cuisinier : ");
                 } while (!int.TryParse(Console.ReadLine(), out idCuisinier));
 
-                // Demande l'ID du consommateur
+                /// Demande l'ID du consommateur
                 do
                 {
                     Console.Write(" Entrez l'ID du consommateur : ");
@@ -491,19 +511,21 @@ namespace Liv_In_Paris
                     Console.Write(" Entrez la note du cuisinier (0 à 5) : ");
                 } while (!float.TryParse(Console.ReadLine(), out noteCuisinier) || noteCuisinier < 0 || noteCuisinier > 5);
 
-                // Demande le commentaire du cuisinier
+                /// Demande le commentaire du cuisinier
                 Console.Write(" Entrez le commentaire du cuisinier : ");
                 commentaireCuisinier = Console.ReadLine();
 
 
                 sql.NoterCommande(idCommande, idCuisinier,idConsommateur, 0,null, noteCuisinier, commentaireCuisinier);
                 Console.WriteLine("retour appuyer entrer");
+                Console.ReadLine();
                 Menu2(sql, ID);
 
             }
             if (action == 7)
             {
                 devenirCuisinier(sql, ID);
+                Menu2(sql, ID);
 
             }
             else
@@ -518,17 +540,26 @@ namespace Liv_In_Paris
 
             string display = "Bonjour cuisinier :D quel action souhaitez vous faire?\n\n[1] Voir mes commandes\n[2]Voir mes plats\n[3]Ajouter plat\n[4]devenir consomateur";
             int action = 0;
-            do { action = int.Parse(Console.ReadLine()); } while (action != 1 && action != 2 && action != 3 && action != 4 );
+            do {
+                Console.WriteLine(display);
+                action = int.Parse(Console.ReadLine()); } while (action != 1 && action != 2 && action != 3 && action != 4 );
+           
 
             if (action == 1)
             {
                 sql.AfficherCommandesParCuisinier(ID);
+                Console.WriteLine("retour appuyer entrer");
+                Console.ReadLine();
+                Menu2(sql, ID);
             }
 
             if (action == 2)
             {
 
                 sql.AfficherTousLesMetsducuisto(sql.idducuisinier(ID));
+                Console.WriteLine("retour appuyer entrer");
+                Console.ReadLine();
+                Menu2(sql, ID);
             }
             if (action == 3)
             {
@@ -566,11 +597,15 @@ namespace Liv_In_Paris
 
                 sql.AjouterMet( nom,  prix,  type, regime,  origine,  pourCombien, idCuisinier);
                 Console.WriteLine("retour appuyer entrer");
+                Console.ReadLine();
                 Menu2(sql, ID);
             }
             if (action == 4)
             {
                 devenirConsommateur(sql, ID);
+                Console.WriteLine("retour appuyer entrer");
+                Console.ReadLine();
+                Menu2(sql, ID);
             }
             
 
@@ -579,6 +614,194 @@ namespace Liv_In_Paris
         static void Menu11(SQL sql, int ID)
         {
             Console.Clear();
+            
+                
+
+                string display = "Bonjour utilisateur hybride :)\n\n[1] Voir plats disponibles\n[2] Rechercher plat\n[3] Voir mes commandes (consommateur)\n[4] Ajouter élément à commande\n[5] Passer une commande\n[6] Noter commandes\n[7] Voir mes plats (cuisinier)\n[8] Ajouter un plat (cuisinier)";
+                int action = 0;
+                
+
+                do
+                {
+                    Console.WriteLine(display);
+
+                    action = int.Parse(Console.ReadLine());
+
+                } while (action < 1 || action > 8);
+
+                if (action == 1)
+                {
+                    sql.AfficherTousLesMets();
+                    Console.WriteLine("retour appuyer entrer");
+                    Console.ReadLine();
+                    Menu2(sql, ID);
+                }
+
+                if (action == 2)
+                {
+                    string nomplat = "";
+                    Console.WriteLine("chercher plat:");
+                    nomplat = Console.ReadLine();
+
+                    sql.ChercherEtAfficherPlat(nomplat);
+                    Console.WriteLine("retour appuyer entrer");
+                    Console.ReadLine();
+                    Menu2(sql, ID);
+                }
+
+                if (action == 3)
+                {
+                    sql.AfficherCommandesParCompte(ID);
+                    Console.WriteLine("retour appuyer entrer");
+                    Console.ReadLine();
+                    Menu2(sql, ID);
+                }
+
+                if (action == 4)
+                {
+                    int idCommande, idMet, quantite;
+                    do
+                    {
+                        Console.Write("Entrez l'ID de la commande : ");
+                    } while (!int.TryParse(Console.ReadLine(), out idCommande));
+
+                    do
+                    {
+                        Console.Write("Entrez l'ID du met : ");
+                    } while (!int.TryParse(Console.ReadLine(), out idMet));
+
+                    do
+                    {
+                        Console.Write("Entrez la quantité : ");
+                    } while (!int.TryParse(Console.ReadLine(), out quantite) || quantite <= 0);
+
+                    sql.AjouterPlatDansCommande(idCommande, idMet, quantite);
+                    Console.WriteLine("retour appuyer entrer");
+                    Console.ReadLine();
+                    Menu2(sql, ID);
+                }
+
+                if (action == 5)
+                {
+                    DateTime fabrication; int idConsommateur, idCuisinier;
+                    do
+                    {
+                        Console.Write(" Entrez la date de fabrication (yyyy-MM-dd) : ");
+                    } while (!DateTime.TryParse(Console.ReadLine(), out fabrication));
+
+                    do
+                    {
+                        Console.Write(" Entrez l'ID du consommateur : ");
+                    } while (!int.TryParse(Console.ReadLine(), out idConsommateur));
+
+                    do
+                    {
+                        Console.Write(" Entrez l'ID du cuisinier : ");
+                    } while (!int.TryParse(Console.ReadLine(), out idCuisinier));
+
+                    sql.AjouterCommande(fabrication, fabrication.AddDays(8), idConsommateur, idCuisinier);
+
+                    int idCommande = sql.DernierIDcommande(); int idMet, quantite;
+
+                    Console.WriteLine("ajouter combien de plats ?");
+                    int nb = int.Parse(Console.ReadLine());
+                    for (int i = 0; i < nb; i++)
+                    {
+                        
+
+                        do
+                        {
+                            Console.Write("Entrez l'ID du met : ");
+                        } while (!int.TryParse(Console.ReadLine(), out idMet));
+
+                        do
+                        {
+                            Console.Write("Entrez la quantité : ");
+                        } while (!int.TryParse(Console.ReadLine(), out quantite) || quantite <= 0);
+
+                        sql.AjouterPlatDansCommande(idCommande, idMet, quantite);
+                    }
+                    Console.WriteLine("retour appuyer entrer");
+                    Console.ReadLine();
+                    Menu2(sql, ID);
+                }
+
+                if (action == 6)
+                {
+                    int idCommande, idCuisinier, idConsommateur;
+                    float noteCuisinier;
+                    string commentaireCuisinier;
+
+                    do
+                    {
+                        Console.Write(" Entrez l'ID de la commande : ");
+                    } while (!int.TryParse(Console.ReadLine(), out idCommande));
+
+                    do
+                    {
+                        Console.Write(" Entrez l'ID du cuisinier : ");
+                    } while (!int.TryParse(Console.ReadLine(), out idCuisinier));
+
+                    do
+                    {
+                        Console.Write(" Entrez l'ID du consommateur : ");
+                    } while (!int.TryParse(Console.ReadLine(), out idConsommateur));
+
+                    do
+                    {
+                        Console.Write(" Entrez la note du cuisinier (0 à 5) : ");
+                    } while (!float.TryParse(Console.ReadLine(), out noteCuisinier) || noteCuisinier < 0 || noteCuisinier > 5);
+
+                    Console.Write(" Entrez le commentaire du cuisinier : ");
+                    commentaireCuisinier = Console.ReadLine();
+
+                    sql.NoterCommande(idCommande, idCuisinier, idConsommateur, 0, null, noteCuisinier, commentaireCuisinier);
+                    Console.WriteLine("retour appuyer entrer");
+                    Console.ReadLine();
+                    Menu2(sql, ID);
+                }
+
+                if (action == 7)
+                {
+                    sql.AfficherTousLesMetsducuisto(sql.idducuisinier(ID));
+                    Console.WriteLine("retour appuyer entrer");
+                    Console.ReadLine();
+                    Menu2(sql, ID);
+                }
+
+                if (action == 8)
+                {
+                    string nom; decimal prix; string type; string regime; string origine; int pourCombien;
+                    int idCuisinier = sql.idducuisinier(ID);
+
+                    Console.Write("🍽 Entrez le nom du met : ");
+                    nom = Console.ReadLine();
+
+                    do
+                    {
+                        Console.Write(" Entrez le prix du met : ");
+                    } while (!decimal.TryParse(Console.ReadLine(), out prix) || prix <= 0);
+
+                    Console.Write(" Entrez le type du met (ex: entrée, plat principal, dessert, etc.) : ");
+                    type = Console.ReadLine();
+
+                    Console.Write("🍽 Entrez le régime du met (ex: végétarien, sans gluten, etc.) : ");
+                    regime = Console.ReadLine();
+
+                    Console.Write(" Entrez l'origine du met (ex: français, italien, etc.) : ");
+                    origine = Console.ReadLine();
+
+                    do
+                    {
+                        Console.Write(" Entrez le nombre de personnes pour lequel ce met est prévu : ");
+                    } while (!int.TryParse(Console.ReadLine(), out pourCombien) || pourCombien <= 0);
+
+                    sql.AjouterMet(nom, prix, type, regime, origine, pourCombien, idCuisinier);
+                    Console.WriteLine("retour appuyer entrer");
+                    Console.ReadLine();
+                    Menu2(sql, ID);
+                }
+            
         }
 
 

@@ -479,6 +479,88 @@ namespace Liv_In_Paris
         }
 
 
+        public void AfficherTousLesMets()
+        {
+            string query = "SELECT DISTINCT Id_met, Nom, Prix FROM mets;";
+
+            using (var conn = new MySqlConnection(connectionString))
+            {
+                conn.Open();
+                using (var cmd = new MySqlCommand(query, conn))
+                using (var reader = cmd.ExecuteReader())
+                {
+                    Console.WriteLine("Liste des mets disponibles :");
+
+                    while (reader.Read())
+                    {
+                        int id = reader.GetInt32("Id_met");
+                        string nom = reader.GetString("Nom");
+                        decimal prix = reader.GetDecimal("Prix");
+
+                        Console.WriteLine($"ID: {id}, Nom: {nom}, Prix: {prix}€");
+                    }
+                }
+            }
+        }
+
+        public void AfficherTousLesMetsducuisto(int idduCuisinier)
+        {
+            string query = "SELECT DISTINCT Id_met, Nom, Prix FROM mets where id_cuisinier=@idduCuisinier;";
+
+            using (var conn = new MySqlConnection(connectionString))
+            {
+                conn.Open();
+                using (var cmd = new MySqlCommand(query, conn))
+                using (var reader = cmd.ExecuteReader())
+                {
+                    Console.WriteLine("Liste des mets disponibles :");
+
+                    while (reader.Read())
+                    {
+                        int id = reader.GetInt32("Id_met");
+                        string nom = reader.GetString("Nom");
+                        decimal prix = reader.GetDecimal("Prix");
+
+                        Console.WriteLine($"ID: {id}, Nom: {nom}, Prix: {prix}€");
+                    }
+                }
+            }
+        }
+
+        public void ChercherEtAfficherPlat(string nomPlat)
+        {
+            string query = "SELECT Id_met, Nom, Prix FROM mets WHERE Nom = @nomPlat;";
+
+            using (var conn = new MySqlConnection(connectionString))
+            {
+                conn.Open();
+                using (var cmd = new MySqlCommand(query, conn))
+                {
+                    cmd.Parameters.AddWithValue("@nomPlat", nomPlat);
+
+                    using (var reader = cmd.ExecuteReader())
+                    {
+                        if (reader.Read()) // Si un plat est trouvé
+                        {
+                            int id = reader.GetInt32("Id_met");
+                            string nom = reader.GetString("Nom");
+                            decimal prix = reader.GetDecimal("Prix");
+
+                            Console.WriteLine($" Le plat existe !");
+                            Console.WriteLine($"ID: {id}, Nom: {nom}, Prix: {prix}€");
+
+                           
+                        }
+                        else
+                        {
+                            Console.WriteLine($" Le plat '{nomPlat}' n'existe pas.");
+                            
+                        }
+                    }
+                }
+            }
+        }
+
         #endregion
 
         #region compose
@@ -526,6 +608,7 @@ namespace Liv_In_Paris
 
         public void AjouterCommande(DateTime fabrication, DateTime peremption, int idConsommateur, int idCuisinier)
         {
+
             using (MySqlConnection conn = new MySqlConnection(connectionString))
             {
                 conn.Open();
@@ -802,6 +885,27 @@ namespace Liv_In_Paris
             }
         }
 
+        public int DernierIDcommande()
+        {
+            int nb = 1;
+            //conn.Open();
+
+            string query = @"SELECT id_commandes FROM commandes";
+
+            using (MySqlCommand cmd = new MySqlCommand(query, conn))
+            using (MySqlDataReader reader = cmd.ExecuteReader())
+            {
+                while (reader.Read())
+                {
+                    if (reader.GetInt32(0) > nb)
+                    {
+                        nb = reader.GetInt32(0);
+                    }
+                }
+                return nb;
+            }
+        }
+
 
 
         public int Dernieridcuisto()
@@ -890,6 +994,25 @@ namespace Liv_In_Paris
             }
         }
 
+        public int idducuisinier(int IDdequi)
+        {
+           int result =0;
+            string query = @"Select id_cuisinier from cuisinier where ID = @IDdequi";
+            
+
+            using (MySqlCommand cmd = new MySqlCommand(query, conn))
+            using (MySqlDataReader reader = cmd.ExecuteReader())
+            {
+                
+                
+                    
+                        result = reader.GetInt32(0);
+                    
+                
+                return result;
+            }
+        }
+
 
         public bool roleconsommateur(int ID)
         {
@@ -913,6 +1036,107 @@ namespace Liv_In_Paris
                 return result;
             }
         }
+
+
+        public bool VerifierCompte(int id, string motDePasse)
+        {
+            string query = "SELECT COUNT(*) FROM Compte WHERE id_compte = @id AND mot_de_passe = @motDePasse;";
+
+            using (var conn = new MySqlConnection(connectionString))
+            {
+                conn.Open();
+                using (var cmd = new MySqlCommand(query, conn))
+                {
+                    
+                    cmd.Parameters.AddWithValue("@id", id);
+                    cmd.Parameters.AddWithValue("@motDePasse", motDePasse);
+
+                    // Si le nombre d'enregistrements retournés est supérieur à 0, le compte existe
+                    int compteExiste = Convert.ToInt32(cmd.ExecuteScalar());
+                    return compteExiste > 0;
+                }
+            }
+        }
+
+        public void AfficherCommandesParCompte(int ID)
+        {
+            string query = @"
+        SELECT c.id_commande, c.Date_Fabrication, c.Date_Peremption, cu.nom AS NomCuisinier
+        FROM Commandes c
+        JOIN cuisinier cu ON c.id_cuisinier = cu.id_cuisinier
+        JOIN consommateur conso ON c.id_consommateur = conso.id_consommateur
+        WHERE conso.ID = @ID;";
+
+            using (var conn = new MySqlConnection(connectionString))
+            {
+                conn.Open();
+                using (var cmd = new MySqlCommand(query, conn))
+                {
+                    cmd.Parameters.AddWithValue("@ID", ID);
+
+                    using (var reader = cmd.ExecuteReader())
+                    {
+                        if (!reader.HasRows)
+                        {
+                            Console.WriteLine($" Aucune commande trouvée pour le compte ID {ID}.");
+                            return;
+                        }
+
+                        Console.WriteLine($" Commandes du compte ID {ID} :");
+                        while (reader.Read())
+                        {
+                            int idCommande = reader.GetInt32("id_commande");
+                            DateTime dateFab = reader.GetDateTime("Date_Fabrication");
+                            DateTime datePer = reader.GetDateTime("Date_Peremption");
+                            string nomCuisinier = reader.GetString("NomCuisinier");
+
+                            Console.WriteLine($" Commande ID: {idCommande},  Fabrication: {dateFab:yyyy-MM-dd},  Péremption: {datePer:yyyy-MM-dd},  Cuisinier: {nomCuisinier}");
+                        }
+                    }
+                }
+            }
+        }
+
+
+        public void AfficherCommandesParCuisinier(int idCompte)
+        {
+            string query = @"
+        SELECT c.id_commande, c.Date_Fabrication, c.Date_Peremption, conso.nom AS NomConsommateur
+        FROM Commandes c
+        JOIN consommateur conso ON c.id_consommateur = conso.id_consommateur
+        JOIN cuisinier cuis ON c.id_cuisinier = cuis.id_cuisinier
+        WHERE cuis.id_compte = @idCompte;";
+
+            using (var conn = new MySqlConnection(connectionString))
+            {
+                conn.Open();
+                using (var cmd = new MySqlCommand(query, conn))
+                {
+                    cmd.Parameters.AddWithValue("@idCompte", idCompte);
+
+                    using (var reader = cmd.ExecuteReader())
+                    {
+                        if (!reader.HasRows)
+                        {
+                            Console.WriteLine($" Aucune commande trouvée pour le cuisinier avec le compte ID {idCompte}.");
+                            return;
+                        }
+
+                        Console.WriteLine($" Commandes préparées par le cuisinier (Compte ID {idCompte}) :");
+                        while (reader.Read())
+                        {
+                            int idCommande = reader.GetInt32("id_commande");
+                            DateTime dateFab = reader.GetDateTime("Date_Fabrication");
+                            DateTime datePer = reader.GetDateTime("Date_Peremption");
+                            string nomConsommateur = reader.GetString("NomConsommateur");
+
+                            Console.WriteLine($" Commande ID: {idCommande}, 🗓 Fabrication: {dateFab:yyyy-MM-dd},  Péremption: {datePer:yyyy-MM-dd},  Client: {nomConsommateur}");
+                        }
+                    }
+                }
+            }
+        }
+
 
         #endregion
     }

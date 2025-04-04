@@ -41,6 +41,7 @@ namespace Liv_In_Paris
             Graph<string> metroGraph = new Graph<string>(connexions, stations, commuteTime, rStationsDic);
 
             Tests<string> t = new Tests<string>(metroGraph);
+            Drawing.DrawGraphFromCoordinates(stations, connexions, "graphe_oriente.png");
             t.TestFunction();
             Console.WriteLine("Tests SQL ...\n");
             t.Test_SQL();
@@ -49,7 +50,7 @@ namespace Liv_In_Paris
 
             menu1(sql, metroGraph);
 
-            Drawing.DrawGraphFromCoordinates(stations, connexions, "graphe_oriente.png");
+           
 
             Console.WriteLine("\n\nProgram finished ...");
             Console.ReadKey();

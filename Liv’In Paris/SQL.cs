@@ -18,7 +18,7 @@ namespace Liv_In_Paris
 
         private MySqlConnection conn;
 
-        // Constructeur : ouvre la connexion automatiquement
+        /// Constructeur : ouvre la connexion automatiquement
         public SQL()
         {
             conn = new MySqlConnection(connectionString);
@@ -33,7 +33,7 @@ namespace Liv_In_Paris
             }
         }
 
-        // Ferme la connexion proprement
+        /// Ferme la connexion 
         public void Close()
         {
             if (conn != null)
@@ -168,7 +168,7 @@ namespace Liv_In_Paris
             }
         }
 
-        public void SupprimerCompte(int id)
+        public void SupprimerCompte(int id) /// on nutiliseras pas cette fonction on prefere bannir les comptes pour garder les infos et pouvoir detecter les gens qui font 2 comptes 
         {
             using (MySqlConnection conn = new MySqlConnection(connectionString))
             {
@@ -182,7 +182,7 @@ namespace Liv_In_Paris
             }
         }
 
-        public void BannirCompte(int id)
+        public void BannirCompte(int id) 
         {
             using (MySqlConnection conn = new MySqlConnection(connectionString))
             {
@@ -236,7 +236,7 @@ namespace Liv_In_Paris
             }
         }
 
-        // Modifier une entreprise
+        
         public void ModifierEntreprise(string nomEntreprise, string nouveauNomReferent, string nouveauMetro)
         {
             using (MySqlConnection conn = new MySqlConnection(connectionString))
@@ -253,7 +253,7 @@ namespace Liv_In_Paris
             }
         }
 
-        // Supprimer une entreprise
+        
         public void SupprimerEntreprise(string nomEntreprise)
         {
             using (MySqlConnection conn = new MySqlConnection(connectionString))
@@ -268,7 +268,7 @@ namespace Liv_In_Paris
             }
         }
 
-        // Afficher toutes les entreprises triées par un critère
+        
         public void AfficherEntreprises(string critere)
         {
             using (MySqlConnection conn = new MySqlConnection(connectionString))
@@ -514,7 +514,7 @@ namespace Liv_In_Paris
                 conn.Open();
                 using (var cmd = new MySqlCommand(query, conn))
                 {
-                    // Ajout du paramètre manquant
+                    
                     cmd.Parameters.AddWithValue("@idduCuisinier", idduCuisinier);
 
                     using (var reader = cmd.ExecuteReader())
@@ -524,7 +524,7 @@ namespace Liv_In_Paris
                         while (reader.Read())
                         {
                             int id = reader.GetInt32("Id_met");
-                            string nom = reader.GetString("Nom_plat"); // Attention : le champ s'appelle "Nom_plat", pas "Nom"
+                            string nom = reader.GetString("Nom_plat"); 
                             decimal prix = reader.GetDecimal("Prix");
 
                             Console.WriteLine($"ID: {id}, Nom: {nom}, Prix: {prix}€");
@@ -548,7 +548,7 @@ namespace Liv_In_Paris
 
                     using (var reader = cmd.ExecuteReader())
                     {
-                        if (reader.Read()) // Si un plat est trouvé
+                        if (reader.Read()) 
                         {
                             int id = reader.GetInt32("Id_met");
                             string nom = reader.GetString("Nom_plat");
@@ -1086,11 +1086,11 @@ namespace Liv_In_Paris
                 conn.Open();
                 using (var cmd = new MySqlCommand(query, conn))
                 {
-                    //// Ajout des paramètres pour protéger contre les injections SQL
+                    
                     cmd.Parameters.AddWithValue("@id", id);
                     cmd.Parameters.AddWithValue("@motDePasse", motDePasse);
 
-                    // Exécution de la requête et récupération du résultat
+                    
                     int compteExiste = Convert.ToInt32(cmd.ExecuteScalar());
                     return compteExiste > 0;
                 }

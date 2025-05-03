@@ -300,6 +300,55 @@ namespace Liv_In_Paris
             sw.Reset();
 
             Separator();
+
+            List<List<int>> incidenceMatrix = new List<List<int>>()
+            {
+                new List<int>() {1},
+                new List<int>() {0, 2},
+                new List<int>() {1, 3, 4, 5, 6, 7},
+                new List<int>() {2, 4, 8, 5},
+                new List<int>() {2, 3, 5},
+                new List<int>() {8, 4, 2, 9, 6, 3},
+                new List<int>() {2, 7, 9, 5 },
+                new List<int>() {2, 6, 9 },
+                new List<int>() {3, 5 },
+                new List<int>() {5, 6, 7 }
+            };
+            List<Node<int>> nodesList = new List<Node<int>>();
+            for (int i = 0; i < 10; i++)
+            {
+                nodesList.Add(new Node<int>(i, i, 0, 0));
+            }
+            List<List<double>> weights = new List<List<double>>();
+            for (int i = 0; i < nodesList.Count; i++)
+            {
+                weights.Add(new List<double>());
+                for (int j = 0; j < nodesList.Count; j++)
+                {
+                    if (incidenceMatrix[i].Contains(j))
+                    {
+                        weights[i].Add(1);
+                    }
+                    else
+                    {
+                        weights[i].Add(0);
+                    }
+                }
+            }
+            Graph<int> graph2 = new Graph<int>(incidenceMatrix, nodesList, weights, new Dictionary<int, int>());
+            Dictionary<int, List<int>> colorMap = graph2.Welsh_Powell();
+            foreach (int key in colorMap.Keys)
+            {
+                Console.Write(key + " => [ ");
+                foreach (int id in colorMap[key])
+                {
+                    Console.Write(id + " ");
+                }
+                Console.Write("]\n");
+            }
+
+            Separator();
+            Separator();
         }
 
 

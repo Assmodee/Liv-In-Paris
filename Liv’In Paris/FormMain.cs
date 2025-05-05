@@ -6,22 +6,34 @@ namespace Liv_In_Paris
 {
     public class FormMain : Form
     {
-        // Champs pour création de compte
+        /// <summary>
+        /// champs utilisés pour la création de compte
+        /// </summary>
         private TextBox txtMdp, txtNom, txtPrenom, txtEmail, txtTel, txtStation, txtNomEntreprise, txtNomReferent;
         private RadioButton rbUtilisateur, rbEntreprise;
         private Button btnValiderCompte;
         private Label lblMessage;
 
+        /// <summary>
+        /// buttons principales
+        /// </summary>
         private Button btnSeConnecter;
         private Button btnCreerCompte;
         private Button btnAdmin;
-
+        /// <summary>
+        ///  identifiant de l'utilisateur connecté actuellement
+        /// </summary>
         private int utilisateurID;
-        private int currentPage = 0; // Pour la pagination
-        private const int itemsPerPage = 10; // Nombre d'éléments par page
+        
+        /// <summary>
+        /// sert a gerer la mise en page de l'affichage des plats
+        /// </summary>
+        private int currentPage = 0; 
+        private const int itemsPerPage = 10; /// Nombre d'éléments par page
 
-        private SQL sql; // Garde une instance partagée
+        private SQL sql; /// Garde une instance partagée
 
+        /// constructeur principal de l'interface
         public FormMain()
         {
             sql = new SQL();
@@ -30,11 +42,13 @@ namespace Liv_In_Paris
             Width = 800;
             Height = 800;
 
+
+            /// Création et configuration des boutons principales
             btnSeConnecter = new Button() { Text = "Se connecter", Top = 30, Left = 50, Width = 180 };
             btnCreerCompte = new Button() { Text = "Créer un compte", Top = 80, Left = 50, Width = 180 };
             btnAdmin = new Button() { Text = "Accès admin", Top = 130, Left = 50, Width = 180 };
 
-            // Ajout des champs pour création de compte (invisible par défaut)
+            /// Ajout des champs pour création de compte (invisible par défaut)
             rbUtilisateur = new RadioButton() { Text = "Utilisateur", Top = 180, Left = 50, Visible = false };
             rbEntreprise = new RadioButton() { Text = "Entreprise", Top = 200, Left = 50, Visible = false };
 
@@ -57,7 +71,7 @@ namespace Liv_In_Paris
                 txtMdp, rbUtilisateur, rbEntreprise, txtNom, txtPrenom, txtEmail, txtTel, txtStation,
                 txtNomEntreprise, txtNomReferent, btnValiderCompte, lblMessage
             });
-
+            /// gestion du bouton se connecter
             btnSeConnecter.Click += (sender, e) =>
             {
                 var loginForm = new FormMain.ConnexionForm(sql);
@@ -65,6 +79,7 @@ namespace Liv_In_Paris
                 loginForm.ShowDialog();
             };
 
+            ///affichage du formulaire de creation de compte
             btnCreerCompte.Click += (sender, e) =>
             {
                 lblMessage.Text = "";
@@ -80,6 +95,7 @@ namespace Liv_In_Paris
                 rbUtilisateur.Checked = true; // Par défaut
             };
 
+            ///bouton admin (non implémenté encore)
             btnAdmin.Click += (sender, e) =>
             {
                 MessageBox.Show("Admin (à implémenter)");
@@ -90,6 +106,10 @@ namespace Liv_In_Paris
             Controls.Add(btnAdmin);
         }
 
+        /// <summary>
+        /// C'est un moyen d'affçchage utilisé ici pour le compte classique et d'entreprise
+        /// </summary>
+        /// <param name="utilisateur"></param>
         private void ToggleForm(bool utilisateur)
         {
             // Champs utilisateur

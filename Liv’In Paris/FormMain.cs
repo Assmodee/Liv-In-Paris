@@ -1,8 +1,6 @@
-﻿
-using System;
+﻿using System;
 using System.Windows.Forms;
 using System.Drawing;
-using Org.BouncyCastle.Asn1.Crmf;
 
 namespace Liv_In_Paris
 {
@@ -19,6 +17,8 @@ namespace Liv_In_Paris
         private Button btnAdmin;
 
         private int utilisateurID;
+        private int currentPage = 0; // Pour la pagination
+        private const int itemsPerPage = 10; // Nombre d'éléments par page
 
         private SQL sql; // Garde une instance partagée
 
@@ -27,7 +27,7 @@ namespace Liv_In_Paris
             sql = new SQL();
 
             Text = "Menu principal";
-            Width = 300;
+            Width = 800;
             Height = 800;
 
             btnSeConnecter = new Button() { Text = "Se connecter", Top = 30, Left = 50, Width = 180 };
@@ -54,15 +54,13 @@ namespace Liv_In_Paris
             lblMessage = new Label() { Text = "", Top = 430, Left = 50, Width = 250, Visible = false };
 
             Controls.AddRange(new Control[] {
-    txtMdp, rbUtilisateur, rbEntreprise, txtNom, txtPrenom, txtEmail, txtTel, txtStation,
-    txtNomEntreprise, txtNomReferent, btnValiderCompte, lblMessage
-});
-
-
+                txtMdp, rbUtilisateur, rbEntreprise, txtNom, txtPrenom, txtEmail, txtTel, txtStation,
+                txtNomEntreprise, txtNomReferent, btnValiderCompte, lblMessage
+            });
 
             btnSeConnecter.Click += (sender, e) =>
             {
-                var loginForm = new ConnexionForm(sql);
+                var loginForm = new FormMain.ConnexionForm(sql);
                 loginForm.Owner = this; // Permet d'appeler AfficherMenuUtilisateur depuis FormMain
                 loginForm.ShowDialog();
             };
@@ -82,7 +80,6 @@ namespace Liv_In_Paris
                 rbUtilisateur.Checked = true; // Par défaut
             };
 
-
             btnAdmin.Click += (sender, e) =>
             {
                 MessageBox.Show("Admin (à implémenter)");
@@ -91,62 +88,6 @@ namespace Liv_In_Paris
             Controls.Add(btnSeConnecter);
             Controls.Add(btnCreerCompte);
             Controls.Add(btnAdmin);
-        }
-
-        // ➕ Classe interne pour le formulaire de connexion
-        private class ConnexionForm : Form
-        {
-            private Label lblID;
-            private TextBox txtID;
-            private Label lblMdp;
-            private TextBox txtMdp;
-            private Button btnConnexion;
-            private readonly SQL sqlRef;
-
-            public ConnexionForm(SQL sql)
-            {
-                sqlRef = sql;
-                Text = "Connexion";
-                Width = 300;
-                Height = 200;
-
-                lblID = new Label() { Text = "ID :", Left = 20, Top = 20, Width = 100 };
-                txtID = new TextBox() { Left = 120, Top = 20, Width = 120 };
-
-                lblMdp = new Label() { Text = "Mot de passe :", Left = 20, Top = 60, Width = 100 };
-                txtMdp = new TextBox() { Left = 120, Top = 60, Width = 120, UseSystemPasswordChar = true };
-
-                btnConnexion = new Button() { Text = "Se connecter", Left = 80, Top = 110, Width = 120 };
-                btnConnexion.Click += BtnConnexion_Click;
-
-                Controls.Add(lblID);
-                Controls.Add(txtID);
-                Controls.Add(lblMdp);
-                Controls.Add(txtMdp);
-                Controls.Add(btnConnexion);
-            }
-
-            private void BtnConnexion_Click(object? sender, EventArgs e)
-            {
-                if (!int.TryParse(txtID.Text, out int id))
-                {
-                    MessageBox.Show("ID invalide");
-                    return;
-                }
-
-                string mdp = txtMdp.Text;
-
-                if (sqlRef.VerifierCompte(id, mdp))
-                {
-                    MessageBox.Show("Connexion réussie !");
-                    ((FormMain)Owner).AfficherMenuUtilisateur(id);
-                    Close();
-                }
-                else
-                {
-                    MessageBox.Show("Échec de la connexion.");
-                }
-            }
         }
 
         private void ToggleForm(bool utilisateur)
@@ -163,13 +104,13 @@ namespace Liv_In_Paris
             txtNomReferent.Visible = !utilisateur;
         }
 
-
         private void ValiderCreationCompte(object? sender, EventArgs e)
         {
             string mdp = txtMdp.Text;
             bool estUtilisateur = rbUtilisateur.Checked;
 
-            sql.AjouterCompte(mdp, estUtilisateur);
+            string hashedPassword = HashPassword(mdp); // Hachage du mot de passe
+            sql.AjouterCompte(hashedPassword, estUtilisateur);
             int id = sql.DernierID();
 
             if (estUtilisateur)
@@ -194,7 +135,6 @@ namespace Liv_In_Paris
             lblMessage.Text = $"✅ Compte créé avec succès !\n🆔 ID attribué : {id}";
             lblMessage.Visible = true;
         }
-
 
         public void AfficherMenuUtilisateur(int id)
         {
@@ -237,8 +177,8 @@ namespace Liv_In_Paris
             else if (estCuisinier && !estConsommateur)
             {
                 // Menu10
-                AjouterBouton("Voir mes commandes", 60);
-                AjouterBouton("Voir mes plats", 100);
+                AjouterBouton("Voir mes commandes", 60, () => AfficherCommandes(id));
+                AjouterBouton("Voir mes plats", 100, AfficherPlatsCuisinier);
                 AjouterBouton("Ajouter plat", 140, AfficherFormAjoutPlat);
                 AjouterBouton("Devenir consommateur", 180, () =>
                 {
@@ -249,12 +189,12 @@ namespace Liv_In_Paris
             else if (!estCuisinier && estConsommateur)
             {
                 // Menu01
-                AjouterBouton("Plats disponibles", 60);
-                AjouterBouton("Rechercher plat", 100);
-                AjouterBouton("Voir mes commandes", 140);
-                AjouterBouton("Ajouter élément à commande", 180);
-                AjouterBouton("Passer une commande", 220);
-                AjouterBouton("Noter une commande", 260);
+                AjouterBouton("Plats disponibles", 60, AfficherPlatsDisponibles);
+                AjouterBouton("Rechercher plat", 100, RechercherPlat);
+                AjouterBouton("Voir mes commandes", 140, () => AfficherCommandes(id));
+                AjouterBouton("Ajouter élément à commande", 180, AjouterElementCommande);
+                AjouterBouton("Passer une commande", 220, PasserCommande);
+                AjouterBouton("Noter une commande", 260, NoterCommande);
                 AjouterBouton("Devenir cuisinier", 300, () =>
                 {
                     sql.AjouterCuisinier("cuisinier_" + id, id);
@@ -264,14 +204,15 @@ namespace Liv_In_Paris
             else
             {
                 // Menu11
-                AjouterBouton("Voir plats", 60);
-                AjouterBouton("Rechercher plat", 100);
-                AjouterBouton("Mes commandes (conso)", 140);
-                AjouterBouton("Ajouter élément", 180);
-                AjouterBouton("Passer commande", 220);
-                AjouterBouton("Noter commande", 260);
-                AjouterBouton("Voir plats (cuisinier)", 300);
+                AjouterBouton("Voir plats", 60, AfficherPlatsDisponibles);
+                AjouterBouton("Rechercher plat", 100, RechercherPlat);
+                AjouterBouton("Mes commandes (conso)", 140, () => AfficherCommandes(id));
+                AjouterBouton("Ajouter élément", 180, AjouterElementCommande);
+                AjouterBouton("Passer commande", 220, PasserCommande);
+                AjouterBouton("Noter commande", 260, NoterCommande);
+                AjouterBouton("Voir plats (cuisinier)", 300, AfficherPlatsCuisinier);
                 AjouterBouton("Ajouter plat (cuisinier)", 340, AfficherFormAjoutPlat);
+                AjouterBouton("Afficher statistiques", 380, AfficherStatistiques);
             }
         }
 
@@ -286,60 +227,358 @@ namespace Liv_In_Paris
             Controls.Add(b);
         }
 
+        private void AfficherCommandes(int id)
+        {
+            sql.AfficherCommandesParCompte(id);
+            MessageBox.Show("Commandes affichées dans la console.");
+        }
+
+
+        private void AfficherPlatsDisponibles()
+        {
+            Controls.Clear();
+
+            Label lblTitre = new Label() { Text = "Plats disponibles", Top = 20, Left = 50, Width = 200, Font = new Font("Arial", 12, FontStyle.Bold) };
+            Controls.Add(lblTitre);
+
+            ListBox listBox = new ListBox() { Top = 60, Left = 50, Width = 200, Height = 300 };
+            Controls.Add(listBox);
+
+            var plats = sql.AfficherTousLesMets();
+            var pagePlats = plats.Skip(currentPage * itemsPerPage).Take(itemsPerPage);
+
+            foreach (var plat in pagePlats)
+            {
+                listBox.Items.Add(plat);
+            }
+
+            Button btnPrecedent = new Button() { Text = "Précédent", Top = 380, Left = 50, Width = 90 };
+            btnPrecedent.Click += (s, e) =>
+            {
+                if (currentPage > 0)
+                {
+                    currentPage--;
+                    AfficherPlatsDisponibles();
+                }
+            };
+            Controls.Add(btnPrecedent);
+
+            Button btnSuivant = new Button() { Text = "Suivant", Top = 380, Left = 160, Width = 90 };
+            btnSuivant.Click += (s, e) =>
+            {
+                if ((currentPage + 1) * itemsPerPage < plats.Count)
+                {
+                    currentPage++;
+                    AfficherPlatsDisponibles();
+                }
+            };
+            Controls.Add(btnSuivant);
+
+            Button btnRetour = new Button() { Text = "Retour", Top = 420, Left = 50, Width = 200 };
+            btnRetour.Click += (s, e) => AfficherMenuUtilisateur(utilisateurID);
+            Controls.Add(btnRetour);
+        }
+
+        private void RechercherPlat()
+        {
+            string nomPlat = Prompt.ShowDialog("Nom du plat à rechercher :", "Rechercher Plat");
+            if (string.IsNullOrWhiteSpace(nomPlat))
+            {
+                MessageBox.Show("Nom de plat invalide ou action annulée.");
+                return;
+            }
+
+            sql.ChercherEtAfficherPlat(nomPlat);
+            MessageBox.Show("Résultat affiché dans la console.", "Rechercher Plat");
+        }
+
+        private void PasserCommande()
+        {
+            string inputId = Prompt.ShowDialog("Entrez l'ID du cuisinier :", "Passer une commande");
+
+            if (!int.TryParse(inputId, out int idCuisinier))
+            {
+                MessageBox.Show("ID invalide.");
+                return;
+            }
+
+            // Vérifie que cet ID appartient bien à un cuisinier
+            if (!sql.rolecuisinier(idCuisinier))
+            {
+                MessageBox.Show("Cet ID ne correspond pas à un cuisinier.");
+                return;
+            }
+
+            DateTime fabrication = DateTime.Now;
+            DateTime peremption = fabrication.AddDays(7);
+            int idConsommateur = utilisateurID;
+
+            sql.AjouterCommande(fabrication, peremption, idConsommateur, idCuisinier);
+            MessageBox.Show("Commande ajoutée avec succès !");
+        }
+
+
+        private void AjouterElementCommande()
+        {
+            string idCommandeStr = Prompt.ShowDialog("Entrez l'ID de la commande :", "Ajouter Élément");
+            if (!int.TryParse(idCommandeStr, out int idCommande))
+            {
+                MessageBox.Show("ID de commande invalide.");
+                return;
+            }
+
+            string idMetStr = Prompt.ShowDialog("Entrez l'ID du plat :", "Ajouter Élément");
+            if (!int.TryParse(idMetStr, out int idMet))
+            {
+                MessageBox.Show("ID du plat invalide.");
+                return;
+            }
+
+            string quantiteStr = Prompt.ShowDialog("Entrez la quantité :", "Ajouter Élément");
+            if (!int.TryParse(quantiteStr, out int quantite) || quantite <= 0)
+            {
+                MessageBox.Show("Quantité invalide.");
+                return;
+            }
+
+            sql.AjouterPlatDansCommande(idCommande, idMet, quantite);
+            MessageBox.Show("Élément ajouté à la commande avec succès !");
+        }
+
+        private void NoterCommande()
+        {
+            string idCommandeStr = Prompt.ShowDialog("Entrez l'ID de la commande :", "Noter Commande");
+            if (!int.TryParse(idCommandeStr, out int idCommande))
+            {
+                MessageBox.Show("ID de commande invalide.");
+                return;
+            }
+
+            string noteClientStr = Prompt.ShowDialog("Entrez la note du client (0 à 5) :", "Noter Commande");
+            if (!float.TryParse(noteClientStr, out float noteClient) || noteClient < 0 || noteClient > 5)
+            {
+                MessageBox.Show("Note invalide.");
+                return;
+            }
+
+            string commentaireClient = Prompt.ShowDialog("Entrez le commentaire du client :", "Noter Commande");
+
+            string noteCuisinierStr = Prompt.ShowDialog("Entrez la note du cuisinier (0 à 5) :", "Noter Commande");
+            if (!float.TryParse(noteCuisinierStr, out float noteCuisinier) || noteCuisinier < 0 || noteCuisinier > 5)
+            {
+                MessageBox.Show("Note invalide.");
+                return;
+            }
+
+            string commentaireCuisinier = Prompt.ShowDialog("Entrez le commentaire du cuisinier :", "Noter Commande");
+
+            sql.NoterCommande(idCommande, utilisateurID, utilisateurID, noteClient, commentaireClient, noteCuisinier, commentaireCuisinier);
+            MessageBox.Show("Commande notée avec succès !");
+        }
+
+        private void AfficherPlatsCuisinier()
+        {
+            Controls.Clear();
+
+            Label lblTitre = new Label()
+            {
+                Text = "Mes plats (cuisinier)",
+                Top = 20,
+                Left = 50,
+                Width = 300,
+                Font = new Font("Arial", 12, FontStyle.Bold)
+            };
+            Controls.Add(lblTitre);
+
+            ListBox listBox = new ListBox()
+            {
+                Top = 60,
+                Left = 50,
+                Width = 250,
+                Height = 300
+            };
+            Controls.Add(listBox);
+
+            int idCuisinier = sql.idducuisinier(utilisateurID);
+            var plats = sql.AfficherTousLesMetsducuisto(idCuisinier); // Cette méthode doit retourner une List<string>
+
+            foreach (var plat in plats)
+            {
+                listBox.Items.Add(plat);
+            }
+
+            Button btnRetour = new Button()
+            {
+                Text = "Retour",
+                Top = 380,
+                Left = 50,
+                Width = 200
+            };
+            btnRetour.Click += (s, e) => AfficherMenuUtilisateur(utilisateurID);
+            Controls.Add(btnRetour);
+        }
+
+
         private void AfficherFormAjoutPlat()
         {
             Controls.Clear();
 
-            Label lblTitre = new Label() { Text = "➕ Ajouter un plat", Top = 20, Left = 50, Width = 200, Font = new System.Drawing.Font("Arial", 12, FontStyle.Bold) };
+            Label lblTitre = new Label()
+            {
+                Text = "Ajouter un nouveau plat",
+                Top = 20,
+                Left = 50,
+                Width = 300,
+                Font = new Font("Arial", 12, FontStyle.Bold)
+            };
             Controls.Add(lblTitre);
 
-            int top = 60;
-            TextBox txtNom = Champ("Nom du plat", ref top);
-            TextBox txtPrix = Champ("Prix (€)", ref top);
-            TextBox txtType = Champ("Type (entrée, plat...)", ref top);
-            TextBox txtRegime = Champ("Régime (végé, halal...)", ref top);
-            TextBox txtOrigine = Champ("Origine", ref top);
-            TextBox txtPour = Champ("Pour combien de personnes", ref top);
+            // Champs nécessaires
+            TextBox txtNom = new TextBox() { PlaceholderText = "Nom du plat", Top = 60, Left = 50, Width = 200 };
+            TextBox txtPrix = new TextBox() { PlaceholderText = "Prix", Top = 100, Left = 50, Width = 200 };
+            TextBox txtType = new TextBox() { PlaceholderText = "Type (entrée, plat...)", Top = 140, Left = 50, Width = 200 };
+            TextBox txtRegime = new TextBox() { PlaceholderText = "Régime (végétarien...)", Top = 180, Left = 50, Width = 200 };
+            TextBox txtOrigine = new TextBox() { PlaceholderText = "Origine (italien...)", Top = 220, Left = 50, Width = 200 };
+            TextBox txtPourCombien = new TextBox() { PlaceholderText = "Portions", Top = 260, Left = 50, Width = 200 };
 
-            Button btnAjouter = new Button() { Text = "✅ Ajouter", Top = top + 10, Left = 50, Width = 200 };
-            Controls.Add(btnAjouter);
-
-            btnAjouter.Click += (s, e) =>
+            Button btnValider = new Button() { Text = "Ajouter", Top = 310, Left = 100, Width = 120 };
+            btnValider.Click += (s, e) =>
             {
-                // Vérification des champs
                 if (!decimal.TryParse(txtPrix.Text, out decimal prix) || prix <= 0)
                 {
-                    MessageBox.Show("Prix invalide");
+                    MessageBox.Show("Prix invalide.");
                     return;
                 }
 
-                if (!int.TryParse(txtPour.Text, out int pourCombien) || pourCombien <= 0)
+                if (!int.TryParse(txtPourCombien.Text, out int portions) || portions <= 0)
                 {
-                    MessageBox.Show("Nombre de personnes invalide");
+                    MessageBox.Show("Nombre de portions invalide.");
                     return;
                 }
 
                 int idCuisinier = sql.idducuisinier(utilisateurID);
+                sql.AjouterMet(txtNom.Text, prix, txtType.Text, txtRegime.Text, txtOrigine.Text, portions, idCuisinier);
 
-                sql.AjouterMet(txtNom.Text, prix, txtType.Text, txtRegime.Text, txtOrigine.Text, pourCombien, idCuisinier);
-
-                MessageBox.Show("🍽 Plat ajouté avec succès !");
-                AfficherMenuUtilisateur(utilisateurID); // Retour au menu
+                MessageBox.Show("Plat ajouté !");
+                AfficherMenuUtilisateur(utilisateurID);
             };
+
+            Controls.AddRange(new Control[] { txtNom, txtPrix, txtType, txtRegime, txtOrigine, txtPourCombien, btnValider });
         }
-        private TextBox Champ(string label, ref int top)
+
+
+        private void AfficherStatistiques()
         {
-            Label lbl = new Label() { Text = label + " :", Top = top, Left = 50, Width = 200 };
-            TextBox txt = new TextBox() { Top = top + 20, Left = 50, Width = 250 };
+            Controls.Clear();
 
-            Controls.Add(lbl);
-            Controls.Add(txt);
+            Label lblTitre = new Label() { Text = "Statistiques", Top = 20, Left = 50, Width = 200, Font = new Font("Arial", 12, FontStyle.Bold) };
+            Controls.Add(lblTitre);
 
-            top += 60;
-            return txt;
+            ListBox listBox = new ListBox() { Top = 60, Left = 50, Width = 200, Height = 300 };
+            Controls.Add(listBox);
+
+            sql.AfficherLivraisonsParCuisinier();
+            listBox.Items.Add("Statistiques affichées dans la console.");
+
+            Button btnRetour = new Button() { Text = "Retour", Top = 380, Left = 50, Width = 200 };
+            btnRetour.Click += (s, e) => AfficherMenuUtilisateur(utilisateurID);
+            Controls.Add(btnRetour);
         }
 
+        private string HashPassword(string password)
+        {
+            using (var sha256 = System.Security.Cryptography.SHA256.Create())
+            {
+                byte[] bytes = sha256.ComputeHash(System.Text.Encoding.UTF8.GetBytes(password));
+                return BitConverter.ToString(bytes).Replace("-", "").ToLower();
+            }
+        }
 
+        private class ConnexionForm : Form
+        {
+            private Label lblID;
+            private TextBox txtID;
+            private Label lblMdp;
+            private TextBox txtMdp;
+            private Button btnConnexion;
+            private readonly SQL sqlRef;
 
+            public ConnexionForm(SQL sql)
+            {
+                sqlRef = sql;
+                Text = "Connexion";
+                Width = 300;
+                Height = 200;
+
+                lblID = new Label() { Text = "ID :", Left = 20, Top = 20, Width = 100 };
+                txtID = new TextBox() { Left = 120, Top = 20, Width = 120 };
+
+                lblMdp = new Label() { Text = "Mot de passe :", Left = 20, Top = 60, Width = 100 };
+                txtMdp = new TextBox() { Left = 120, Top = 60, Width = 120, UseSystemPasswordChar = true };
+
+                btnConnexion = new Button() { Text = "Se connecter", Left = 80, Top = 110, Width = 120 };
+                btnConnexion.Click += BtnConnexion_Click;
+
+                Controls.Add(lblID);
+                Controls.Add(txtID);
+                Controls.Add(lblMdp);
+                Controls.Add(txtMdp);
+                Controls.Add(btnConnexion);
+            }
+
+            private void BtnConnexion_Click(object? sender, EventArgs e)
+            {
+                if (!int.TryParse(txtID.Text, out int id))
+                {
+                    MessageBox.Show("ID invalide");
+                    return;
+                }
+
+                string mdp = txtMdp.Text;
+                string hashedMdp = ((FormMain)Owner).HashPassword(mdp);
+
+                if (sqlRef.VerifierCompte(id, hashedMdp))
+                {
+                    MessageBox.Show("Connexion réussie !");
+                    ((FormMain)Owner).AfficherMenuUtilisateur(id);
+                    Close();
+                }
+                else
+                {
+                    MessageBox.Show("Échec de la connexion.");
+                }
+
+            }
+        }
+
+    }
+
+    public static class Prompt
+    {
+        public static string ShowDialog(string text, string caption)
+        {
+            Form prompt = new Form()
+            {
+                Width = 300,
+                Height = 150,
+                Text = caption
+            };
+
+            Label lblText = new Label() { Left = 10, Top = 10, Text = text, Width = 260 };
+            TextBox txtInput = new TextBox() { Left = 10, Top = 40, Width = 260 };
+            Button btnOk = new Button() { Text = "OK", Left = 200, Top = 70, Width = 70 };
+
+            string result = null;
+
+            btnOk.Click += (sender, e) => { result = txtInput.Text; prompt.Close(); };
+
+            prompt.Controls.Add(lblText);
+            prompt.Controls.Add(txtInput);
+            prompt.Controls.Add(btnOk);
+
+            prompt.ShowDialog();
+
+            return string.IsNullOrWhiteSpace(result) ? null : result;
+        }
     }
 }

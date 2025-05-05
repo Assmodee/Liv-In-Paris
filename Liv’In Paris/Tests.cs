@@ -125,7 +125,7 @@ namespace Liv_In_Paris
 
                 /// Afficher toutes les commandes
                 Console.WriteLine("Liste des commandes :");
-                var commandes = sql.AfficherCommandes();
+                var commandes = "sql.AfficherCommandes()";
                 foreach (var commande in commandes)
                 {
                     Console.WriteLine(commande);

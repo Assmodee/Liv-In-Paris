@@ -327,7 +327,7 @@ namespace Liv_In_Paris
                         colored = true;
                         for (int i = 0; i < colorMap[k].Count && colored; i++)
                         {
-                            if (incidenceMatrix[colorMap[k][i]].Contains(nodeId))
+                            if (incidenceMatrix[colorMap[k][i]].Contains(nodeId) || incidenceMatrix[nodeId].Contains(colorMap[k][i]))
                             {
                                 colored = false;
                             }

@@ -43,7 +43,9 @@ namespace Liv_In_Paris
             Graph<string> metroGraph = new Graph<string>(connexions, stations, commuteTime, rStationsDic);
 
             Tests<string> t = new Tests<string>(metroGraph);
-            Drawing.DrawGraphFromCoordinates(stations, connexions, "graphe_oriente.png");
+
+            var colorMap = metroGraph.Welsh_Powell();
+            Drawing.DrawGraphFromCoordinates(stations, connexions, "graph_oriente.png", colorMap);
             t.TestFunction();
             Console.WriteLine("Tests SQL ...\n");
             t.Test_SQL();

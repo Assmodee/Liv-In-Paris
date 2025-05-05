@@ -107,30 +107,38 @@ namespace Liv_In_Paris
         }
 
         /// <summary>
-        /// C'est un moyen d'affçchage utilisé ici pour le compte classique et d'entreprise
+        /// C'est un moyen d'affçchage utilisé ici pour le compte classique et d'entreprise avec des
+        /// cases à cocher pour choisir le type de compte
         /// </summary>
         /// <param name="utilisateur"></param>
         private void ToggleForm(bool utilisateur)
         {
-            // Champs utilisateur
+            /// Champs utilisateur
             txtNom.Visible = utilisateur;
             txtPrenom.Visible = utilisateur;
             txtEmail.Visible = utilisateur;
             txtTel.Visible = utilisateur;
             txtStation.Visible = true;
 
-            // Champs entreprise
+            /// Champs entreprise
             txtNomEntreprise.Visible = !utilisateur;
             txtNomReferent.Visible = !utilisateur;
         }
 
+        /// <summary>
+        /// 
+        /// methode appelée lors de la validation du formulaire de création de compte
+        /// on enregistre le mot de passe et on insere soit le client soit l'entreprise
+        /// </summary>
+        /// <param name="sender"></param>
+        /// <param name="e"></param>
         private void ValiderCreationCompte(object? sender, EventArgs e)
         {
             string mdp = txtMdp.Text;
             bool estUtilisateur = rbUtilisateur.Checked;
 
-            string hashedPassword = HashPassword(mdp); // Hachage du mot de passe
-            sql.AjouterCompte(hashedPassword, estUtilisateur);
+            // Utilisation directe du mot de passe, sans hachage
+            sql.AjouterCompte(mdp, estUtilisateur);
             int id = sql.DernierID();
 
             if (estUtilisateur)
@@ -152,14 +160,14 @@ namespace Liv_In_Paris
                 sql.AjouterEntreprise(nomEntreprise, nomReferent, id, station);
             }
 
-            lblMessage.Text = $"✅ Compte créé avec succès !\n🆔 ID attribué : {id}";
+            lblMessage.Text = $" Compte créé avec succès !\n ID attribué : {id}";
             lblMessage.Visible = true;
         }
 
         public void AfficherMenuUtilisateur(int id)
         {
             utilisateurID = id;
-            Controls.Clear(); // Efface tous les anciens contrôles (login, création...)
+            Controls.Clear(); /// Efface tous les anciens contrôles (login, création...)
 
             bool estCuisinier = sql.rolecuisinier(id);
             bool estConsommateur = sql.roleconsommateur(id);
@@ -173,6 +181,7 @@ namespace Liv_In_Paris
                 Font = new Font("Arial", 12, FontStyle.Bold)
             };
             Controls.Add(titre);
+            /// Ici on traite les 4 types de menu possible (alternant consomateur et cuisinier)
 
             if (!estCuisinier && !estConsommateur)
             {
@@ -189,6 +198,7 @@ namespace Liv_In_Paris
                 btnClient.Click += (s, e) =>
                 {
                     sql.AjouterConsommateur(id);
+                    
                     AfficherMenuUtilisateur(id);
                 };
 
@@ -236,6 +246,13 @@ namespace Liv_In_Paris
             }
         }
 
+        /// <summary>
+        /// mettre les boutons un par un prend beaucoup de espace
+        /// donc on a fait une fonction dédié
+        /// </summary>
+        /// <param name="texte"></param>
+        /// <param name="top"></param>
+        /// <param name="onClick"></param>
         private void AjouterBouton(string texte, int top, Action? onClick = null)
         {
             Button b = new Button() { Text = texte, Top = top, Left = 50, Width = 250 };

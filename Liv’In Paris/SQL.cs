@@ -175,19 +175,27 @@ namespace Liv_In_Paris
 
         #region compte
 
-        public void AjouterCompte(string mdp, bool estUtilisateur)
+        public void AjouterCompte(string Mdp, bool est_utilisateur)
         {
-            using (MySqlConnection conn = new MySqlConnection(connectionString))
+            try
             {
-                conn.Open();
-                string query = "INSERT INTO Compte (Mdp, est_utilisateur) VALUES (@mdp, @estUtilisateur)";
-                using (MySqlCommand cmd = new MySqlCommand(query, conn))
+                 using (MySqlConnection conn = new MySqlConnection(connectionString))
                 {
-                    cmd.Parameters.AddWithValue("@mdp", mdp);
-                    cmd.Parameters.AddWithValue("@estUtilisateur", estUtilisateur);
-                    cmd.ExecuteNonQuery();
+                    conn.Open();
+                    string query = "INSERT INTO Compte (Mdp, est_utilisateur) VALUES (@Mdp, @est_utilisateur)";
+                    using (MySqlCommand cmd = new MySqlCommand(query, conn))
+                    {
+                        cmd.Parameters.AddWithValue("@Mdp", Mdp);
+                        cmd.Parameters.AddWithValue("@est_utilisateur", est_utilisateur);
+                        cmd.ExecuteNonQuery();
+                    }
                 }
             }
+            catch (MySqlException ex)
+            {
+                Console.WriteLine("Erreur MySQL : " + ex.Message);
+            }
+
         }
 
         public void ModifierCompte(int id, string mdp, bool? estUtilisateur)

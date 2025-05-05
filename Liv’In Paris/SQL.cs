@@ -989,7 +989,7 @@ namespace Liv_In_Paris
         public int DernierID()
         {
             int nb = 1;
-            conn.Open();
+            
 
             string query = @"SELECT ID FROM Compte";
 
@@ -1013,7 +1013,7 @@ namespace Liv_In_Paris
 
             using (MySqlConnection conn = new MySqlConnection(connectionString))
             {
-                conn.Open();
+                
 
                 string query = "SELECT MAX(id_commande) FROM Commandes";
 
@@ -1035,7 +1035,7 @@ namespace Liv_In_Paris
         public int Dernieridcuisto()
         {
             int nb = 0;
-            //conn.Open();
+            
 
             string query = @"SELECT id_cuisinier FROM cuisinier";
 
@@ -1056,7 +1056,7 @@ namespace Liv_In_Paris
         public int Dernieridconsomateur() 
         {
             int nb = 0;
-            conn.Open();
+            
 
             string query = @"SELECT id_consommateur FROM Consommateur";
 
@@ -1077,7 +1077,7 @@ namespace Liv_In_Paris
         public int DernierId_commande()
         {
             int nb = 0;
-            conn.Open();
+           
 
             string query = @"SELECT id_commande FROM Commandes";
 

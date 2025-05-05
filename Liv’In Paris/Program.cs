@@ -50,7 +50,7 @@ namespace Liv_In_Paris
             t.TestFunction();
             
 
-            Console.WriteLine(sql.pourAlex());
+            Console.WriteLine(sql.GetPrixCommande(1));
             
 
             Console.WriteLine("\nTests SQL terminés, la prochaine partie concerne l'interaction avec l'application. Appuyer pour continuer ...");

@@ -680,20 +680,20 @@ namespace Liv_In_Paris
 
         #region relatif commande 
 
-        public void AjouterCommande(DateTime fabrication, DateTime peremption, int idConsommateur, int idCuisinier)
+        public void AjouterCommande(DateTime fabrication, DateTime peremption, int id_consommateur, int id_cuisinier)
         {
 
             using (MySqlConnection conn = new MySqlConnection(connectionString))
             {
                 conn.Open();
-                string query = "INSERT INTO Commandes ( Date_Fabrication, Date_Peremption, id_consommateur, id_cuisinier) VALUES ( @fabrication, @peremption, @idConsommateur, @idCuisinier)";
+                string query = "INSERT INTO Commandes ( Date_Fabrication, Date_Peremption, id_consommateur, id_cuisinier) VALUES ( @fabrication, @peremption, @id_consommateur, @id_cuisinier)";
                 using (MySqlCommand cmd = new MySqlCommand(query, conn))
                 {
                     
                     cmd.Parameters.AddWithValue("@fabrication", fabrication);
                     cmd.Parameters.AddWithValue("@peremption", peremption);
-                    cmd.Parameters.AddWithValue("@idConsommateur", idConsommateur);
-                    cmd.Parameters.AddWithValue("@idCuisinier", idCuisinier);
+                    cmd.Parameters.AddWithValue("@id_consommateur", id_consommateur);
+                    cmd.Parameters.AddWithValue("@id_cuisinier", id_cuisinier);
                     cmd.ExecuteNonQuery();
                 }
             }
@@ -765,18 +765,18 @@ namespace Liv_In_Paris
             }
         }
 
-        public void AjouterPlatDansCommande(int idCommande, int idMet, int quantite)
+        public void AjouterPlatDansCommande(int id_commande, int Id_met, int Quantite)
         {
             using (MySqlConnection conn = new MySqlConnection(connectionString))
             {
                 conn.Open();
 
                
-                string checkQuery = "SELECT Quantite FROM compose_commande WHERE id_commande = @idCommande AND Id_met = @idMet";
+                string checkQuery = "SELECT Quantite FROM compose_commande WHERE id_commande = @id_commande AND Id_met = @Id_met";
                 using (MySqlCommand checkCmd = new MySqlCommand(checkQuery, conn))
                 {
-                    checkCmd.Parameters.AddWithValue("@idCommande", idCommande);
-                    checkCmd.Parameters.AddWithValue("@idMet", idMet);
+                    checkCmd.Parameters.AddWithValue("@id_commande", id_commande);
+                    checkCmd.Parameters.AddWithValue("@Id_met", Id_met);
 
                     object result = checkCmd.ExecuteScalar();
 
@@ -784,24 +784,24 @@ namespace Liv_In_Paris
                     {
                        
                         int quantiteExistante = Convert.ToInt32(result);
-                        string updateQuery = "UPDATE compose_commande SET Quantite = @newQuantite WHERE id_commande = @idCommande AND Id_met = @idMet";
+                        string updateQuery = "UPDATE compose_commande SET Quantite = @newQuantite WHERE id_commande = @id_commande AND Id_met = @Id_met";
                         using (MySqlCommand updateCmd = new MySqlCommand(updateQuery, conn))
                         {
-                            updateCmd.Parameters.AddWithValue("@newQuantite", quantiteExistante + quantite);
-                            updateCmd.Parameters.AddWithValue("@idCommande", idCommande);
-                            updateCmd.Parameters.AddWithValue("@idMet", idMet);
+                            updateCmd.Parameters.AddWithValue("@newQuantite", quantiteExistante + Quantite);
+                            updateCmd.Parameters.AddWithValue("@id_commande", id_commande);
+                            updateCmd.Parameters.AddWithValue("@Id_met", Id_met);
                             updateCmd.ExecuteNonQuery();
                         }
                     }
                     else
                     {
                        
-                        string insertQuery = "INSERT INTO compose_commande (id_commande, Id_met, Quantite) VALUES (@idCommande, @idMet, @quantite)";
+                        string insertQuery = "INSERT INTO compose_commande (id_commande, Id_met, Quantite) VALUES (@id_commande, @Id_met, @Quantite)";
                         using (MySqlCommand insertCmd = new MySqlCommand(insertQuery, conn))
                         {
-                            insertCmd.Parameters.AddWithValue("@idCommande", idCommande);
-                            insertCmd.Parameters.AddWithValue("@idMet", idMet);
-                            insertCmd.Parameters.AddWithValue("@quantite", quantite);
+                            insertCmd.Parameters.AddWithValue("@id_commande", id_commande);
+                            insertCmd.Parameters.AddWithValue("@Id_met", Id_met);
+                            insertCmd.Parameters.AddWithValue("@Quantite", Quantite);
                             insertCmd.ExecuteNonQuery();
                         }
                     }

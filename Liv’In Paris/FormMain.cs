@@ -197,6 +197,9 @@ namespace Liv_In_Paris
 
                 btnClient.Click += (s, e) =>
                 {
+                    Console.WriteLine("id: " + id);
+                    Console.WriteLine("idconso: " + sql.idducuisinier(id));
+
                     sql.AjouterConsommateur(id);
                     
                     AfficherMenuUtilisateur(id);
@@ -572,9 +575,8 @@ namespace Liv_In_Paris
                 }
 
                 string mdp = txtMdp.Text;
-                string hashedMdp = ((FormMain)Owner).HashPassword(mdp);
 
-                if (sqlRef.VerifierCompte(id, hashedMdp))
+                if (sqlRef.VerifierCompte(id, mdp))
                 {
                     MessageBox.Show("Connexion réussie !");
                     ((FormMain)Owner).AfficherMenuUtilisateur(id);
@@ -584,6 +586,7 @@ namespace Liv_In_Paris
                 {
                     MessageBox.Show("Échec de la connexion.");
                 }
+
 
             }
         }

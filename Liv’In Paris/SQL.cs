@@ -1,5 +1,6 @@
 ﻿using MySql.Data.MySqlClient;
 using MySqlX.XDevAPI.Common;
+using Org.BouncyCastle.Asn1.Ocsp;
 using System;
 using System.Collections.Generic;
 using System.ComponentModel.Design;
@@ -47,7 +48,7 @@ namespace Liv_In_Paris
         {
             string result = "";
 
-            StringBuilder sb = new StringBuilder();
+            
             string query = @"
             SELECT 
                 conso.ID AS ConsumerAccount, 
@@ -767,18 +768,18 @@ namespace Liv_In_Paris
             }
         }
 
-        public void AjouterPlatDansCommande(int idCommande, int idMet, int quantite)
+        public void AjouterPlatDansCommande(int id_commande, int Id_met, int Quantite)
         {
             using (MySqlConnection conn = new MySqlConnection(connectionString))
             {
                 conn.Open();
 
                
-                string checkQuery = "SELECT Quantite FROM compose_commande WHERE id_commande = @idCommande AND Id_met = @idMet";
+                string checkQuery = "SELECT Quantite FROM compose_commande WHERE id_commande = @id_commande AND Id_met = @Id_met";
                 using (MySqlCommand checkCmd = new MySqlCommand(checkQuery, conn))
                 {
-                    checkCmd.Parameters.AddWithValue("@idCommande", idCommande);
-                    checkCmd.Parameters.AddWithValue("@idMet", idMet);
+                    checkCmd.Parameters.AddWithValue("@id_commande", id_commande);
+                    checkCmd.Parameters.AddWithValue("@Id_met", Id_met);
 
                     object result = checkCmd.ExecuteScalar();
 
@@ -786,24 +787,24 @@ namespace Liv_In_Paris
                     {
                        
                         int quantiteExistante = Convert.ToInt32(result);
-                        string updateQuery = "UPDATE compose_commande SET Quantite = @newQuantite WHERE id_commande = @idCommande AND Id_met = @idMet";
+                        string updateQuery = "UPDATE compose_commande SET Quantite = @newQuantite WHERE id_commande = @id_commande AND Id_met = @Id_met";
                         using (MySqlCommand updateCmd = new MySqlCommand(updateQuery, conn))
                         {
-                            updateCmd.Parameters.AddWithValue("@newQuantite", quantiteExistante + quantite);
-                            updateCmd.Parameters.AddWithValue("@idCommande", idCommande);
-                            updateCmd.Parameters.AddWithValue("@idMet", idMet);
+                            updateCmd.Parameters.AddWithValue("@newQuantite", quantiteExistante + Quantite);
+                            updateCmd.Parameters.AddWithValue("@id_commande", id_commande);
+                            updateCmd.Parameters.AddWithValue("@Id_met", Id_met);
                             updateCmd.ExecuteNonQuery();
                         }
                     }
                     else
                     {
                        
-                        string insertQuery = "INSERT INTO compose_commande (id_commande, Id_met, Quantite) VALUES (@idCommande, @idMet, @quantite)";
+                        string insertQuery = "INSERT INTO compose_commande (id_commande, Id_met, Quantite) VALUES (@id_commande, @Id_met, @Quantite)";
                         using (MySqlCommand insertCmd = new MySqlCommand(insertQuery, conn))
                         {
-                            insertCmd.Parameters.AddWithValue("@idCommande", idCommande);
-                            insertCmd.Parameters.AddWithValue("@idMet", idMet);
-                            insertCmd.Parameters.AddWithValue("@quantite", quantite);
+                            insertCmd.Parameters.AddWithValue("@id_commande", id_commande);
+                            insertCmd.Parameters.AddWithValue("@Id_met", Id_met);
+                            insertCmd.Parameters.AddWithValue("@Quantite", Quantite);
                             insertCmd.ExecuteNonQuery();
                         }
                     }
@@ -969,17 +970,19 @@ namespace Liv_In_Paris
             {
                 conn.Open();
                 string query = @"
-                SELECT COALESCE(SUM(m.Prix * cc.Quantite), 0) AS prix_total
-                FROM compose_commande cc
-                JOIN mets m ON cc.Id_met = m.Id_met
-                WHERE cc.id_commande = @commandeId;";
+                                    SELECT SUM(m.Prix * cc.Quantite) AS prix_total
+                                    FROM compose_commande cc
+                                    JOIN mets m ON cc.Id_met = m.Id_met
+                                    WHERE cc.id_commande = @commandeId;";
 
                 using (MySqlCommand cmd = new MySqlCommand(query, conn))
                 {
                     cmd.Parameters.AddWithValue("@commandeId", commandeId);
 
                     var result = cmd.ExecuteScalar();
-                    prixTotal = (result != DBNull.Value && result != null) ? Convert.ToDecimal(result) : 0m;
+                    prixTotal = (result == DBNull.Value || result == null) ? 0m : Convert.ToDecimal(result);
+
+
                 }
             }
 
@@ -989,7 +992,7 @@ namespace Liv_In_Paris
         public int DernierID()
         {
             int nb = 1;
-            //conn.Open();
+            
 
             string query = @"SELECT ID FROM Compte";
 
@@ -1013,7 +1016,7 @@ namespace Liv_In_Paris
 
             using (MySqlConnection conn = new MySqlConnection(connectionString))
             {
-                conn.Open();
+                
 
                 string query = "SELECT MAX(id_commande) FROM Commandes";
 
@@ -1035,7 +1038,7 @@ namespace Liv_In_Paris
         public int Dernieridcuisto()
         {
             int nb = 0;
-            //conn.Open();
+            
 
             string query = @"SELECT id_cuisinier FROM cuisinier";
 
@@ -1053,10 +1056,10 @@ namespace Liv_In_Paris
             }
         }
 
-        public int Dernieridconsomateur() // pas test
+        public int Dernieridconsomateur() 
         {
             int nb = 0;
-            //conn.Open();
+            
 
             string query = @"SELECT id_consommateur FROM Consommateur";
 
@@ -1077,7 +1080,7 @@ namespace Liv_In_Paris
         public int DernierId_commande()
         {
             int nb = 0;
-            //conn.Open();
+           
 
             string query = @"SELECT id_commande FROM Commandes";
 
@@ -1264,6 +1267,75 @@ WHERE conso.ID = @ID;";
                     }
                 }
             }
+        }
+
+
+        public decimal obtenirnoteconsomateur(int idconso)
+        {
+            decimal result = 0m;
+
+            using (MySqlConnection connection = new MySqlConnection(connectionString))
+            {
+                string querry = @"select avg(note_client) 
+                                  from RATING 
+                                  where id_consommateur = @idconso";
+
+                try
+                {
+                    connection.Open();
+                    using (MySqlCommand command = new MySqlCommand(querry, connection))
+                    {
+                        command.Parameters.AddWithValue("@idconso", idconso);
+
+                        var moyenne = command.ExecuteScalar();
+                        if (moyenne != null)
+                        {
+                            result = Convert.ToDecimal(moyenne);
+                        }
+                    }
+                }
+                catch (Exception ex)
+                {
+                    Console.WriteLine("Une erreur s'est produite : " + ex.Message);
+                }
+            }
+
+
+            return result;
+        }
+
+        public decimal obtenirnotecuisinier(int idcuisto)
+        {
+            decimal result = 0m;
+
+            using (MySqlConnection connection = new MySqlConnection(connectionString))
+            {
+                string querry = @"select avg(note_cuisinier) 
+                                  from RATING 
+                                  where id_cuisinier = @idcuisto";
+
+                try
+                {
+                    connection.Open();
+                    using (MySqlCommand command = new MySqlCommand(querry, connection))
+                    {
+                        command.Parameters.AddWithValue("@idcuisto", idcuisto);
+
+                        var moyenne = command.ExecuteScalar();
+                        if (moyenne != null)
+                        {
+                            result = Convert.ToDecimal(moyenne);
+                        }
+                    }
+                }
+                catch (Exception ex)
+                {
+                    Console.WriteLine("Une erreur s'est produite : " + ex.Message);
+                }
+            }
+
+
+            return result;
         }
 
 

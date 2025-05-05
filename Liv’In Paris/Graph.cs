@@ -82,6 +82,39 @@ namespace Liv_In_Paris
         }
 
 
+        public List<int[]> GetArcByWeight()
+        {
+            Dictionary<double, List<int[]>> map = new Dictionary<double, List<int[]>>();
+            List<double> weightsList = new List<double>();
+            for (int i = 0; i < weights.Count; i++)
+            {
+                for (int j = 0; j < weights[i].Count && i != j; j++)
+                {
+                    if (map.Keys.Contains(weights[i][j]))
+                    {
+                        map[weights[i][j]].Add(new int[2] {i, j});
+                    }
+                    else
+                    {
+                        map[weights[i][j]] = new List<int[]>() { new int[2] { i, j } };
+                        weightsList.Add(weights[i][j]);
+                    }
+                }
+            }
+            weightsList.Sort();
+            List<int[]> arcList = new List<int[]>();
+            foreach (int weight in weightsList)
+            {
+                foreach (int[] arc in map[weight])
+                {
+                    arcList.Add(arc);
+                }
+            }
+
+            return arcList;
+        }
+
+
         public void CopyElements(double[,] m1, double[,] m2)
         {
             for (int i = 0; i < m1.GetLength(0); i++)
@@ -346,6 +379,17 @@ namespace Liv_In_Paris
             return colorMap;
         }
 
+
+        #endregion
+
+
+        #region arbres couvrants
+
+        public List<List<int>> Kruskal()
+        {
+            List<List<int>> treeIncidenceMatrix = new List<List<int>>();
+            return treeIncidenceMatrix;
+        }
 
         #endregion
     }

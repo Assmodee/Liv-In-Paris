@@ -125,7 +125,11 @@ namespace Liv_In_Paris
 
                 /// Afficher toutes les commandes
                 Console.WriteLine("Liste des commandes :");
+
                 var commandes = "sql.AfficherCommandes()";
+
+                
+
                 foreach (var commande in commandes)
                 {
                     Console.WriteLine(commande);
@@ -348,7 +352,39 @@ namespace Liv_In_Paris
             }
 
             Separator();
-            Separator();
+
+            List<List<int>> incidenceMatrix2 = new List<List<int>>()
+            {
+                new List<int>() {1, 3, 4, 2},
+                new List<int>() {0, 2},
+                new List<int>() {1, 3, 0 },
+                new List<int>() {2, 4, 0 },
+                new List<int>() {0, 3}
+            };
+
+            List<List<double>> weights2 = new List<List<double>>()
+            {
+                new List<double>() {4, 6, 6, 4},
+                new List<double>() {4, 2},
+                new List<double>() {2, 8, 4},
+                new List<double>() {8, 9, 6},
+                new List<double>() {6, 9}
+            };
+
+            List<Node<int>> nodesList2 = new List<Node<int>>();
+            for (int i = 0; i < 5; i++)
+            {
+                nodesList2.Add(new Node<int>(i, i, 0, 0));
+            }
+
+            Graph<int> graph3 = new Graph<int>(incidenceMatrix2, nodesList, weights2, new Dictionary<int, int>());
+
+            List<int[]> arcs = graph3.GetArcByWeight();
+
+            foreach (int[] arc in arcs)
+            {
+                Console.Write("\n(" + arc[0] + " ," + arc[1] + ")");
+            }
         }
 
 

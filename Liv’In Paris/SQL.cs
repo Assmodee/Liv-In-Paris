@@ -1,5 +1,6 @@
 ﻿using MySql.Data.MySqlClient;
 using MySqlX.XDevAPI.Common;
+using Org.BouncyCastle.Asn1.Ocsp;
 using System;
 using System.Collections.Generic;
 using System.ComponentModel.Design;
@@ -47,7 +48,7 @@ namespace Liv_In_Paris
         {
             string result = "";
 
-            StringBuilder sb = new StringBuilder();
+            
             string query = @"
             SELECT 
                 conso.ID AS ConsumerAccount, 
@@ -966,17 +967,19 @@ namespace Liv_In_Paris
             {
                 conn.Open();
                 string query = @"
-                SELECT COALESCE(SUM(m.Prix * cc.Quantite), 0) AS prix_total
-                FROM compose_commande cc
-                JOIN mets m ON cc.Id_met = m.Id_met
-                WHERE cc.id_commande = @commandeId;";
+                                    SELECT SUM(m.Prix * cc.Quantite) AS prix_total
+                                    FROM compose_commande cc
+                                    JOIN mets m ON cc.Id_met = m.Id_met
+                                    WHERE cc.id_commande = @commandeId;";
 
                 using (MySqlCommand cmd = new MySqlCommand(query, conn))
                 {
                     cmd.Parameters.AddWithValue("@commandeId", commandeId);
 
                     var result = cmd.ExecuteScalar();
-                    prixTotal = (result != DBNull.Value && result != null) ? Convert.ToDecimal(result) : 0m;
+                    prixTotal = (result == DBNull.Value || result == null) ? 0m : Convert.ToDecimal(result);
+
+
                 }
             }
 
@@ -986,7 +989,7 @@ namespace Liv_In_Paris
         public int DernierID()
         {
             int nb = 1;
-            //conn.Open();
+            conn.Open();
 
             string query = @"SELECT ID FROM Compte";
 
@@ -1050,10 +1053,10 @@ namespace Liv_In_Paris
             }
         }
 
-        public int Dernieridconsomateur() // pas test
+        public int Dernieridconsomateur() 
         {
             int nb = 0;
-            //conn.Open();
+            conn.Open();
 
             string query = @"SELECT id_consommateur FROM Consommateur";
 
@@ -1074,7 +1077,7 @@ namespace Liv_In_Paris
         public int DernierId_commande()
         {
             int nb = 0;
-            //conn.Open();
+            conn.Open();
 
             string query = @"SELECT id_commande FROM Commandes";
 
@@ -1261,6 +1264,75 @@ WHERE conso.ID = @ID;";
                     }
                 }
             }
+        }
+
+
+        public decimal obtenirnoteconsomateur(int idconso)
+        {
+            decimal result = 0m;
+
+            using (MySqlConnection connection = new MySqlConnection(connectionString))
+            {
+                string querry = @"select avg(note_client) 
+                                  from RATING 
+                                  where id_consommateur = @idconso";
+
+                try
+                {
+                    connection.Open();
+                    using (MySqlCommand command = new MySqlCommand(querry, connection))
+                    {
+                        command.Parameters.AddWithValue("@idconso", idconso);
+
+                        var moyenne = command.ExecuteScalar();
+                        if (moyenne != null)
+                        {
+                            result = Convert.ToDecimal(moyenne);
+                        }
+                    }
+                }
+                catch (Exception ex)
+                {
+                    Console.WriteLine("Une erreur s'est produite : " + ex.Message);
+                }
+            }
+
+
+            return result;
+        }
+
+        public decimal obtenirnotecuisinier(int idcuisto)
+        {
+            decimal result = 0m;
+
+            using (MySqlConnection connection = new MySqlConnection(connectionString))
+            {
+                string querry = @"select avg(note_cuisinier) 
+                                  from RATING 
+                                  where id_cuisinier = @idcuisto";
+
+                try
+                {
+                    connection.Open();
+                    using (MySqlCommand command = new MySqlCommand(querry, connection))
+                    {
+                        command.Parameters.AddWithValue("@idcuisto", idcuisto);
+
+                        var moyenne = command.ExecuteScalar();
+                        if (moyenne != null)
+                        {
+                            result = Convert.ToDecimal(moyenne);
+                        }
+                    }
+                }
+                catch (Exception ex)
+                {
+                    Console.WriteLine("Une erreur s'est produite : " + ex.Message);
+                }
+            }
+
+
+            return result;
         }
 
 

@@ -8,6 +8,7 @@ using System.Security.Cryptography;
 using System.Xml.Linq;
 //using static System.Net.Mime.MediaTypeNames;
 using System.Windows.Forms;
+using System.Runtime.CompilerServices;
 
 namespace Liv_In_Paris
 {
@@ -49,6 +50,7 @@ namespace Liv_In_Paris
             t.Test_SQL();
 
             Console.WriteLine(sql.pourAlex());
+            Console.WriteLine(sql.GetPrixCommande(1));
 
             Console.WriteLine("\nTests SQL terminés, la prochaine partie concerne l'interaction avec l'application. Appuyer pour continuer ...");
             Console.ReadKey();

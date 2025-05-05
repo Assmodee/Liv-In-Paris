@@ -970,6 +970,26 @@ namespace Liv_In_Paris
 
         #region fonction autre
 
+        public int idduconsomateur(int id)
+        {
+            int result = 0;
+            string query = @"SELECT id_consommateur FROM consommateur WHERE ID = @id";
+
+            using (MySqlCommand cmd = new MySqlCommand(query, conn))
+            {
+                cmd.Parameters.AddWithValue("@id", id);
+
+                using (MySqlDataReader reader = cmd.ExecuteReader())
+                {
+                    if (reader.Read()) // Important !
+                    {
+                        result = reader.GetInt32(0);
+                    }
+                }
+            }
+
+            return result;
+        }
         public decimal GetPrixCommande(int commandeId)
         {
             decimal prixTotal = 0m;

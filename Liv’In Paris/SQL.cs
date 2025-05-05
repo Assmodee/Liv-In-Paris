@@ -14,7 +14,7 @@ namespace Liv_In_Paris
     internal class SQL
     {
 
-        private static string connectionString = "Server=localhost;Database=liv_in_paris;User ID=root;Password=65368843.Mau;";
+        private static string connectionString = "Server=localhost;Database=liv_in_paris;User ID=superbozo;Password=\"On peut tromper une personne mille fois. On peut tromper mille personne une fois. Mais on ne peut pas tromper mille personnes, mille fois\";";
 
         private MySqlConnection conn;
 
@@ -41,6 +41,43 @@ namespace Liv_In_Paris
                 conn.Close();
                 Console.WriteLine("Connexion fermée.");
             }
+        }
+
+        public string pourAlex()
+        {
+            string result = "";
+
+            StringBuilder sb = new StringBuilder();
+            string query = @"
+            SELECT 
+                conso.ID AS ConsumerAccount, 
+                cuis.ID AS ChefAccount
+            FROM Commandes cmd
+            JOIN Consommateur conso ON cmd.id_consommateur = conso.id_consommateur
+            JOIN Cuisinier cuis ON cmd.id_cuisinier = cuis.id_cuisinier;
+        ";
+
+            using (MySqlConnection conn = new MySqlConnection(connectionString))
+            {
+                // magie noir 
+                conn.Open();
+                using (MySqlCommand cmd = new MySqlCommand(query, conn))
+                using (MySqlDataReader reader = cmd.ExecuteReader())
+                {
+                    while (reader.Read())
+                    {
+                        int consumer = reader.GetInt32("ConsumerAccount");
+                        int chef = reader.GetInt32("ChefAccount");
+
+                        
+                        result += consumer + "|" + chef + "|" + "true" + "\n";
+                    }
+                }
+            }
+
+            
+
+            return result;
         }
 
         #region client
@@ -454,7 +491,37 @@ namespace Liv_In_Paris
             }
         }
 
+        public static void ValiderCommande(int idCommande)
+        {
+           
 
+            string query = "UPDATE Commandes SET validé = true WHERE id_commande = @id_commande";
+
+            using (MySqlConnection connection = new MySqlConnection(connectionString))
+            {
+                try
+                {
+                    connection.Open();
+                    using (MySqlCommand command = new MySqlCommand(query, connection))
+                    {
+                        command.Parameters.AddWithValue("@id_commande", idCommande);
+                        int rowsAffected = command.ExecuteNonQuery();
+                        if (rowsAffected > 0)
+                        {
+                            Console.WriteLine("Commande validée avec succès.");
+                        }
+                        else
+                        {
+                            Console.WriteLine("Aucune commande trouvée avec cet ID.");
+                        }
+                    }
+                }
+                catch (Exception ex)
+                {
+                    Console.WriteLine("Erreur : " + ex.Message);
+                }
+            }
+        }
         #endregion
 
         #region mets
@@ -661,23 +728,40 @@ namespace Liv_In_Paris
             }
         }
 
-        public List<string> AfficherCommandes()
+        public static void AfficherCommandesValides()
         {
-            List<string> commandes = new List<string>();
-            using (MySqlConnection conn = new MySqlConnection(connectionString))
+            
+            string query = @"
+                                SELECT * FROM Commandes
+                                WHERE CURDATE() BETWEEN Date_Fabrication AND Date_Peremption;
+                            ";
+
+            using (MySqlConnection connection = new MySqlConnection(connectionString))
             {
-                conn.Open();
-                string query = "SELECT * FROM Commandes";
-                using (MySqlCommand cmd = new MySqlCommand(query, conn))
-                using (MySqlDataReader reader = cmd.ExecuteReader())
+                try
                 {
-                    while (reader.Read())
+                    connection.Open();
+                    using (MySqlCommand command = new MySqlCommand(query, connection))
+                    using (MySqlDataReader reader = command.ExecuteReader())
                     {
-                        commandes.Add($"Commande ID: {reader["id_commande"]}");
+                        while (reader.Read())
+                        {
+                            int id = reader.GetInt32("id_commande");
+                            DateTime fabrication = reader.GetDateTime("Date_Fabrication");
+                            DateTime peremption = reader.GetDateTime("Date_Peremption");
+                            int idConsommateur = reader.GetInt32("id_consommateur");
+                            int idCuisinier = reader.GetInt32("id_cuisinier");
+                            
+
+                            Console.WriteLine($"Commande {id} | Fabriquée le {fabrication:yyyy-MM-dd} | Périme le {peremption:yyyy-MM-dd} | Consommateur: {idConsommateur} | Cuisinier: {idCuisinier} ");
+                        }
                     }
                 }
+                catch (Exception ex)
+                {
+                    Console.WriteLine("Erreur : " + ex.Message);
+                }
             }
-            return commandes;
         }
 
         public void AjouterPlatDansCommande(int idCommande, int idMet, int quantite)
@@ -686,7 +770,7 @@ namespace Liv_In_Paris
             {
                 conn.Open();
 
-                // Vérifie si le plat est déjà présent
+               
                 string checkQuery = "SELECT Quantite FROM compose_commande WHERE id_commande = @idCommande AND Id_met = @idMet";
                 using (MySqlCommand checkCmd = new MySqlCommand(checkQuery, conn))
                 {
@@ -697,7 +781,7 @@ namespace Liv_In_Paris
 
                     if (result != null)
                     {
-                        // Le plat existe déjà, on met à jour la quantité
+                       
                         int quantiteExistante = Convert.ToInt32(result);
                         string updateQuery = "UPDATE compose_commande SET Quantite = @newQuantite WHERE id_commande = @idCommande AND Id_met = @idMet";
                         using (MySqlCommand updateCmd = new MySqlCommand(updateQuery, conn))
@@ -710,7 +794,7 @@ namespace Liv_In_Paris
                     }
                     else
                     {
-                        // Le plat n'existe pas encore dans la commande, on l'insère
+                       
                         string insertQuery = "INSERT INTO compose_commande (id_commande, Id_met, Quantite) VALUES (@idCommande, @idMet, @quantite)";
                         using (MySqlCommand insertCmd = new MySqlCommand(insertQuery, conn))
                         {
@@ -872,7 +956,7 @@ namespace Liv_In_Paris
 
 
 
-        #region fonction pas test
+        #region fonction autre
 
         public decimal GetPrixCommande(int commandeId)
         {
@@ -1181,6 +1265,33 @@ WHERE conso.ID = @ID;";
 
 
         #endregion
+
+
+        #region fancy
+
+        public static void ExecuterRequeteLibre(string requete)
+        {
+
+            using (MySqlConnection connection = new MySqlConnection(connectionString))
+            {
+                try
+                {
+                    connection.Open();
+                    using (MySqlCommand command = new MySqlCommand(requete, connection))
+                    {
+                        int lignesAffectees = command.ExecuteNonQuery();
+                        Console.WriteLine($"Requête exécutée avec succès. Lignes affectées : {lignesAffectees}");
+                    }
+                }
+                catch (Exception ex)
+                {
+                    Console.WriteLine("Une erreur s'est produite : " + ex.Message);
+                }
+            }
+        }
+
+        #endregion
+
     }
 }
 

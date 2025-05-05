@@ -14,7 +14,7 @@ namespace Liv_In_Paris
     internal class SQL
     {
 
-        private static string connectionString = "Server=localhost;Database=liv_in_paris;User ID=root;Password=C@rioc@78600;";
+        private static string connectionString = "Server=localhost;Database=liv_in_paris;User ID=root;Password=65368843.Mau;";
 
         private MySqlConnection conn;
 

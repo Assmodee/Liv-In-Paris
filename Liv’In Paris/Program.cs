@@ -6,6 +6,8 @@ using System.Drawing;
 using System.Runtime.Intrinsics.Arm;
 using System.Security.Cryptography;
 using System.Xml.Linq;
+//using static System.Net.Mime.MediaTypeNames;
+using System.Windows.Forms;
 
 namespace Liv_In_Paris
 {
@@ -47,6 +49,14 @@ namespace Liv_In_Paris
             t.Test_SQL();
             Console.WriteLine("\nTests SQL terminés, la prochaine partie concerne l'interaction avec l'application. Appuyer pour continuer ...");
             Console.ReadKey();
+
+            Application.EnableVisualStyles();
+            Application.SetCompatibleTextRenderingDefault(false);
+            Application.Run(new FormMain());
+
+            // Lancer l'interface principale
+
+            Application.Run(new FormMain());
 
             menu1(sql, metroGraph);
 

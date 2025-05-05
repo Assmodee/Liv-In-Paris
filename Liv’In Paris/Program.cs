@@ -46,11 +46,10 @@ namespace Liv_In_Paris
             Tests<string> t = new Tests<string>(metroGraph);
             Drawing.DrawGraphFromCoordinates(stations, connexions, "graphe_oriente.png");
             t.TestFunction();
-            Console.WriteLine("Tests SQL ...\n");
-            t.Test_SQL();
+            
 
             Console.WriteLine(sql.pourAlex());
-            Console.WriteLine(sql.GetPrixCommande(1));
+            
 
             Console.WriteLine("\nTests SQL terminés, la prochaine partie concerne l'interaction avec l'application. Appuyer pour continuer ...");
             Console.ReadKey();

@@ -48,7 +48,7 @@ namespace Liv_In_Paris
         {
             string result = "";
 
-            StringBuilder sb = new StringBuilder();
+            
             string query = @"
             SELECT 
                 conso.ID AS ConsumerAccount, 

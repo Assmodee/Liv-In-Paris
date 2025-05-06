@@ -341,6 +341,9 @@ namespace Liv_In_Paris
             }
             Graph<int> graph2 = new Graph<int>(incidenceMatrix, nodesList, weights, new Dictionary<int, int>());
             Dictionary<int, List<int>> colorMap = graph2.Welsh_Powell();
+
+            Console.WriteLine("\nWelsh-Powell : ");
+
             foreach (int key in colorMap.Keys)
             {
                 Console.Write(key + " => [ ");
@@ -377,14 +380,29 @@ namespace Liv_In_Paris
                 nodesList2.Add(new Node<int>(i, i, 0, 0));
             }
 
-            Graph<int> graph3 = new Graph<int>(incidenceMatrix2, nodesList, weights2, new Dictionary<int, int>());
+            Graph<int> graph3 = new Graph<int>(incidenceMatrix2, nodesList2, weights2, new Dictionary<int, int>());
 
-            List<int[]> arcs = graph3.GetArcByWeight();
+            List<int[]> arcs = graph3.Kruskal();
+
+            Console.WriteLine("Kruskal : ");
 
             foreach (int[] arc in arcs)
             {
                 Console.Write("\n(" + arc[0] + " ," + arc[1] + ")");
             }
+
+            Console.WriteLine();
+
+            arcs = graph3.Prim();
+
+            Console.WriteLine("\nPrim : ");
+
+            foreach (int[] arc in arcs)
+            {
+                Console.Write("\n(" + arc[0] + " ," + arc[1] + ")");
+            }
+
+            Separator();
         }
 
 

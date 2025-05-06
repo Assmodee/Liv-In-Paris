@@ -1,7 +1,9 @@
 ﻿using System;
+using System.CodeDom.Compiler;
 using System.Collections.Generic;
 using System.Collections.Immutable;
 using System.Drawing;
+using System.Drawing.Design;
 using System.Linq;
 using System.Runtime.CompilerServices;
 using System.Text;
@@ -13,10 +15,10 @@ namespace Liv_In_Paris
     {
         List<List<int>> incidenceMatrix;
         double[,] adjacenceMatrix;
-        int size; /// <remarks># of connexions</remarks>
-        List<Node<T>> nodesList; /// <remarks>Liste des noeuds par id croissant</remarks>
-        List<List<double>> weights; /// <remarks>Liste des poids des connexions</remarks>
-        Dictionary<T, int> reverseIdDic; /// <remarks>Dictionnaire value vers id pour opérer sur les noeuds depuis leur valeur</remarks>
+        int size;
+        List<Node<T>> nodesList;
+        List<List<double>> weights;
+        Dictionary<T, int> reverseIdDic;
 
 
         public Graph(List<List<int>> incidenceMatrix, List<Node<T>> nodesList, List<List<double>> weights, Dictionary<T, int> reverseIdDic)
@@ -49,69 +51,73 @@ namespace Liv_In_Paris
 
         public List<int> GetNodesByDegree()
         {
-            /// <summary>Renvoie la liste des Id des noeuds, triée par ordre décroissant de degré
-            /// (utilisé pour l'algorithme de Welsh-Powell).
-            /// </summary>
-            Dictionary<int, List<int>> map = new Dictionary<int, List<int>>();
-            List<int> degreesList = new List<int>();
+            List<int> nodeIdList = new List<int>();
+            List<int> degrees = new List<int>();
+
             for (int i = 0; i < incidenceMatrix.Count; i++)
             {
-                int degree = incidenceMatrix[i].Count;
-                if (map.Keys.Contains(degree))
-                {
-                    map[degree].Add(i);
-                }
-                else
-                {
-                    map[degree] = new List<int>() { i };
-                    degreesList.Add(degree);
-                }
+                degrees.Add(incidenceMatrix[i].Count);
+                nodeIdList.Add(i);
             }
-            degreesList.Sort();
-            degreesList.Reverse();
-            List<int> nodesList = new List<int>();
-            foreach (int d in degreesList)
+
+            for (int i = 0; i < degrees.Count; i++)
             {
-                foreach (int nodeId in map[d])
+                for (int j = 0; j < degrees.Count - 1; j++)
                 {
-                    nodesList.Add(nodeId);
+                    if (degrees[j] < degrees[j + 1])
+                    {
+                        int tempDegree = degrees[j];
+                        degrees[j] = degrees[j + 1];
+                        degrees[j + 1] = tempDegree;
+
+                        int tempNode = nodeIdList[j];
+                        nodeIdList[j] = nodeIdList[j + 1];
+                        nodeIdList[j + 1] = tempNode;
+                    }
                 }
             }
 
-            return nodesList;
+            return nodeIdList;
         }
 
 
         public List<int[]> GetArcByWeight()
         {
-            Dictionary<double, List<int[]>> map = new Dictionary<double, List<int[]>>();
+            List<int[]> arcsList = new List<int[]>();
             List<double> weightsList = new List<double>();
-            for (int i = 0; i < weights.Count; i++)
+            List<int> visitedNodes = new List<int>();
+
+            for (int i = 0; i < incidenceMatrix.Count; i++)
             {
-                for (int j = 0; j < weights[i].Count && i != j; j++)
+                for (int j = 0; j < incidenceMatrix[i].Count; j++)
                 {
-                    if (map.Keys.Contains(weights[i][j]))
+                    visitedNodes.Add(i);
+                    if (!visitedNodes.Contains(incidenceMatrix[i][j]))
                     {
-                        map[weights[i][j]].Add(new int[2] {i, j});
-                    }
-                    else
-                    {
-                        map[weights[i][j]] = new List<int[]>() { new int[2] { i, j } };
                         weightsList.Add(weights[i][j]);
+                        arcsList.Add(new int[2] { i, incidenceMatrix[i][j] });
                     }
-                }
-            }
-            weightsList.Sort();
-            List<int[]> arcList = new List<int[]>();
-            foreach (int weight in weightsList)
-            {
-                foreach (int[] arc in map[weight])
-                {
-                    arcList.Add(arc);
                 }
             }
 
-            return arcList;
+            for (int i = 0; i < weightsList.Count; i++)
+            {
+                for (int j = 0; j < weightsList.Count - 1; j++)
+                {
+                    if (weightsList[j] > weightsList[j + 1])
+                    {
+                        double tempWeight = weightsList[j];
+                        weightsList[j] = weightsList[j + 1];
+                        weightsList[j + 1] = tempWeight;
+
+                        int[] tempArc = arcsList[j];
+                        arcsList[j] = arcsList[j + 1];
+                        arcsList[j + 1] = tempArc;
+                    }
+                }
+            }
+
+            return arcsList;
         }
 
 
@@ -165,7 +171,7 @@ namespace Liv_In_Paris
         {
             if (visitedNodes.Count < nodesList.Count)
             {
-                if (!visitedNodes.Contains(currentNodeId)) /// <remarks>Evite les circuits</remarks>
+                if (!visitedNodes.Contains(currentNodeId))
                 {
                     visitedNodes.Add(currentNodeId);
                     foreach (int nodeId in incidenceMatrix[currentNodeId])
@@ -193,7 +199,7 @@ namespace Liv_In_Paris
                     }
                 }
                 visitedNodes.Add(currentNodeId);
-                if (nodesToVisit.Count > 0) ///<remarks> Continue uniquement s'il reste des noeuds à visiter</remarks>
+                if (nodesToVisit.Count > 0)
                     BFS(visitedNodes, nodesToVisit, nodesToVisit.Dequeue());
             }
         }
@@ -226,7 +232,6 @@ namespace Liv_In_Paris
             distances[startingNodeId] = 0;
             int currentNodeId = 0;
 
-            /// <remarks>Dijkstra commence ici</remarks>
             while (currentNodeId != endingNodeId)
             {
                 currentNodeId = GetMinElementId(distances);
@@ -264,7 +269,6 @@ namespace Liv_In_Paris
             distances[0] = double.MaxValue;
             distances[startingNodeId] = 0;
 
-            /// <remarks>Bellman-Ford</remarks>
             for (int cpt = 0; cpt < size; cpt++)
             {
                 for (int i = 1; i < incidenceMatrix.Count; i++)
@@ -307,7 +311,6 @@ namespace Liv_In_Paris
                 }
             }
 
-            /// <remarks>Commence ici</remarks>
             for (int k = 0; k < nodesCount; k++)
             {
                 for (int i = 0; i < nodesCount; i++)
@@ -317,7 +320,7 @@ namespace Liv_In_Paris
                         if (distances[i, k] + distances[k, j] < distances[i, j])
                         {
                             distances[i, j] = distances[i, k] + distances[k, j];
-                            pathMatrix[i, j] = pathMatrix[i, k]; /// <remarks>Met à jour la matrice de correspondance des plus courts chemins pour pouvoir lister les noeuds empruntés lors d'un chemin</remarks>
+                            pathMatrix[i, j] = pathMatrix[i, k];
                         }
                     }
                 }
@@ -385,10 +388,85 @@ namespace Liv_In_Paris
 
         #region arbres couvrants
 
-        public List<List<int>> Kruskal()
+        public List<int[]> Kruskal()
         {
-            List<List<int>> treeIncidenceMatrix = new List<List<int>>();
-            return treeIncidenceMatrix;
+            /// <summary>
+            /// Implémente l'algorithme de Kruskal. Les arêtes sont récupérées
+            /// directement triées par poids. 
+            /// </summary>
+            List<int[]> treeArcs = new List<int[]>();
+            List<int[]> sortedArcs = GetArcByWeight();
+            List<int> visitedNodes = new List<int>();
+
+            foreach (int[] arc in sortedArcs)
+            {
+                if (!visitedNodes.Contains(arc[0]) || !visitedNodes.Contains(arc[1]))
+                {
+                    treeArcs.Add(arc);
+                    visitedNodes.Add(arc[0]);
+                    visitedNodes.Add(arc[1]);
+                }
+            }
+
+            return treeArcs;
+        }
+
+
+        public List<int[]> Prim()
+        {
+            /// <summary>
+            /// Implémente l'algorithme de Prim pas nécessairement de la façon la plus
+            /// optimisée possible.
+            /// </summary>
+            List<int[]> treeArcs = new List<int[]>();
+            List<int> visitedNodes = new List<int>() { 0 };
+            List<int[]> currentArcs = new List<int[]>();
+
+            while (visitedNodes.Count < nodesList.Count)
+            {
+                int index = 0;
+                while (index < currentArcs.Count)
+                {
+                    if (visitedNodes.Contains(currentArcs[index][0]) && visitedNodes.Contains(currentArcs[index][1]))
+                    {
+                        currentArcs.Remove(currentArcs[index]);
+                    }
+                    else
+                    {
+                        index++;
+                    }
+                }
+
+                for (int i = 0; i < incidenceMatrix[visitedNodes[visitedNodes.Count - 1]].Count; i++)
+                {
+                    if (!visitedNodes.Contains(incidenceMatrix[visitedNodes[visitedNodes.Count - 1]][i]))
+                    {
+                        currentArcs.Add(new int[2] { visitedNodes[visitedNodes.Count - 1], incidenceMatrix[visitedNodes[visitedNodes.Count - 1]][i] });
+                    }
+                }
+
+                int minWeightIndex = 0;
+                double minWeight = double.MaxValue;
+
+                for (int i = 0; i < currentArcs.Count; i++)
+                {
+                    int currentArcIndex = 0;
+                    while (incidenceMatrix[currentArcs[i][0]][currentArcIndex] != currentArcs[i][1])
+                    {
+                        currentArcIndex++;
+                    }
+                    if (weights[currentArcs[i][0]][currentArcIndex] < minWeight)
+                    {
+                        minWeight = weights[currentArcs[i][0]][currentArcIndex];
+                        minWeightIndex = i;
+                    }
+                }
+
+                treeArcs.Add(currentArcs[minWeightIndex]); ;
+                visitedNodes.Add(currentArcs[minWeightIndex][1]);
+            }
+
+            return treeArcs;
         }
 
         #endregion

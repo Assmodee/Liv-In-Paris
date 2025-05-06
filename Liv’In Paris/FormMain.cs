@@ -354,7 +354,7 @@ namespace Liv_In_Paris
 
             DateTime fabrication = DateTime.Now;
             DateTime peremption = fabrication.AddDays(7);
-            int idConsommateur = utilisateurID;
+            int idConsommateur = sql.idduconsomateur(utilisateurID);
 
             sql.AjouterCommande(fabrication, peremption, idConsommateur, idCuisinier);
             MessageBox.Show("Commande ajoutée avec succès !");

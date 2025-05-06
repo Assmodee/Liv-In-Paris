@@ -198,10 +198,13 @@ namespace Liv_In_Paris
                 btnClient.Click += (s, e) =>
                 {
                     Console.WriteLine("id: " + id);
-                    Console.WriteLine("idconso: " + sql.idducuisinier(id));
+                    Console.WriteLine("rol: " + sql.roleconsommateur(id));
 
                     sql.AjouterConsommateur(id);
-                    
+
+                    Console.WriteLine("rol: " + sql.roleconsommateur(id));
+
+
                     AfficherMenuUtilisateur(id);
                 };
 
@@ -343,7 +346,7 @@ namespace Liv_In_Paris
             }
 
             // Vérifie que cet ID appartient bien à un cuisinier
-            if (!sql.rolecuisinier(idCuisinier))
+            if (sql.rolecuisinier(idCuisinier))
             {
                 MessageBox.Show("Cet ID ne correspond pas à un cuisinier.");
                 return;

@@ -71,7 +71,7 @@ namespace Liv_In_Paris
                         int chef = reader.GetInt32("ChefAccount");
 
                         
-                        result += consumer + "|" + chef + "|" + "true" + "\n";
+                        result += consumer + "|"+ IDduidconso(consumer) +";"+ chef + "|" +IDduidcuisibier(chef) + "\n";
                     }
                 }
             }
@@ -990,6 +990,50 @@ namespace Liv_In_Paris
 
             return result;
         }
+
+        public int IDduidconso(int id)
+        {
+            int result = 0;
+            string query = @"SELECT ID FROM consommateur WHERE id_consommateur = @id";
+
+            using (MySqlCommand cmd = new MySqlCommand(query, conn))
+            {
+                cmd.Parameters.AddWithValue("@id", id);
+
+                using (MySqlDataReader reader = cmd.ExecuteReader())
+                {
+                    if (reader.Read()) // Important !
+                    {
+                        result = reader.GetInt32(0);
+                    }
+                }
+            }
+
+            return result;
+        }
+
+        public int IDduidcuisibier(int id)
+        {
+            int result = 0;
+            string query = @"SELECT ID FROM cuisinier WHERE id_cuisinier = @id";
+
+            using (MySqlCommand cmd = new MySqlCommand(query, conn))
+            {
+                cmd.Parameters.AddWithValue("@id", id);
+
+                using (MySqlDataReader reader = cmd.ExecuteReader())
+                {
+                    if (reader.Read()) // Important !
+                    {
+                        result = reader.GetInt32(0);
+                    }
+                }
+            }
+
+            return result;
+        }
+
+
         public decimal GetPrixCommande(int commandeId)
         {
             decimal prixTotal = 0m;

@@ -403,6 +403,9 @@ namespace Liv_In_Paris
             }
 
             Separator();
+
+            SQL sql = new SQL();
+            Console.WriteLine(sql.pourAlex());
         }
 
 

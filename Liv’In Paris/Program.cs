@@ -18,7 +18,7 @@ namespace Liv_In_Paris
         {
             SQL sql = new SQL();
 
-           
+            Console.WriteLine(sql.NbCompte());
 
             string stationsFile = File.ReadAllText("Stations.txt");
             string connexionsFile = File.ReadAllText("Connexions.txt");
@@ -55,11 +55,23 @@ namespace Liv_In_Paris
             List<List<double>> relationsWeights = new List<List<double>>();
             Dictionary<string, int> idToName = new Dictionary<string, int>();
             List<int> registeredIds = new List<int>();
+
+            for (int i = 0; i < sql.NbCompte() + 1; i++)
+            {
+                usersRelations.Add(new List<int>());
+                relationsWeights.Add(new List<double>());
+            }
+
             foreach (string line in usersConnections.Split('\n'))
             {
                 List<string> lineInfo = GetConnectionInfo(line);
                 if (lineInfo.Count > 1)
                 {
+                    foreach (string info in lineInfo)
+                    {
+                        Console.Write(info + " ");
+                    }
+                    Console.WriteLine();
                     if (!registeredIds.Contains(int.Parse(lineInfo[1])))
                     {
                         users.Add(new Node<string>(int.Parse(lineInfo[1]), lineInfo[0], 0, 0));
@@ -69,14 +81,6 @@ namespace Liv_In_Paris
                     {
                         users.Add(new Node<string>(int.Parse(lineInfo[3]), lineInfo[2], 0, 0));
                         idToName[lineInfo[2]] = int.Parse(lineInfo[3]);
-                    }
-                    if (usersRelations.Count <= Math.Max(int.Parse(lineInfo[1]) + 1, int.Parse(lineInfo[3]) + 1))
-                    {
-                        for (int i = 0; i < Math.Max(int.Parse(lineInfo[1]) + 1, int.Parse(lineInfo[3]) + 1) - usersRelations.Count() + 2; i++)
-                        {
-                            usersRelations.Add(new List<int>());
-                            relationsWeights.Add(new List<double>());
-                        }
                     }
                     if (!usersRelations[int.Parse(lineInfo[1])].Contains(int.Parse(lineInfo[3])))
                     {

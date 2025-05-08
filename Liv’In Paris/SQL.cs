@@ -1,4 +1,5 @@
 ﻿using MySql.Data.MySqlClient;
+using Mysqlx.Session;
 using MySqlX.XDevAPI.Common;
 using Org.BouncyCastle.Asn1.Ocsp;
 using System;
@@ -199,6 +200,39 @@ namespace Liv_In_Paris
         #endregion
 
         #region compte
+
+
+        public int NbCompte()
+        {
+            int nb=0;
+            try
+            {
+                using (MySqlConnection conn = new MySqlConnection(connectionString))
+                {
+                    conn.Open();
+                    string query = "select COUNT(*) from compte";
+                    using (MySqlCommand cmd = new MySqlCommand(query, conn))
+                    {
+
+                        object value = cmd.ExecuteScalar();
+
+
+                        if (value != null && value != DBNull.Value)
+                        {
+                            nb = Convert.ToInt32(value); 
+                        }
+
+
+                    }
+                }
+            }
+            catch (MySqlException ex)
+            {
+                Console.WriteLine("Erreur MySQL : " + ex.Message);
+            }
+
+            return nb;
+        }
 
         public void AjouterCompte(string Mdp, bool est_utilisateur)
         {

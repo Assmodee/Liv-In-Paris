@@ -38,73 +38,103 @@ namespace Liv_In_Paris
         {
             sql = new SQL();
 
+            // Titre et taille de la fenêtre
             Text = "Menu principal";
             Width = 800;
             Height = 800;
+            StartPosition = FormStartPosition.CenterScreen; // Centrer la fenêtre sur l'écran
 
+            // Définir la couleur de fond
+            BackColor = Color.FromArgb(255, 165, 196, 201);
 
-            /// Création et configuration des boutons principales
-            btnSeConnecter = new Button() { Text = "Se connecter", Top = 30, Left = 50, Width = 180 };
-            btnCreerCompte = new Button() { Text = "Créer un compte", Top = 80, Left = 50, Width = 180 };
-            btnAdmin = new Button() { Text = "Accès admin", Top = 130, Left = 50, Width = 180 };
+            // Ajout du logo
+            PictureBox logo = new PictureBox();
+            logo.Image = Image.FromFile(@"C:\Users\sanag\Documents\GitHub\Liv-In-Paris\Liv’In Paris\bin\Debug\net9.0-windows\logo.jpeg");
+            logo.Size = new Size(200, 200); // carré
+            logo.SizeMode = PictureBoxSizeMode.Zoom;
+            logo.Left = (ClientSize.Width - logo.Width) / 2; // centré horizontalement
+            logo.Top = 20;
+            Controls.Add(logo);
 
-            /// Ajout des champs pour création de compte (invisible par défaut)
-            rbUtilisateur = new RadioButton() { Text = "Utilisateur", Top = 180, Left = 50, Visible = false };
-            rbEntreprise = new RadioButton() { Text = "Entreprise", Top = 200, Left = 50, Visible = false };
+            // Espacement vertical de base sous le logo
+            int topOffset = logo.Bottom + 20;
+            int centerX = (ClientSize.Width - 180) / 2;
 
-            txtMdp = new TextBox() { PlaceholderText = "Mot de passe", Top = 160, Left = 50, Width = 180, Visible = false };
-            txtNom = new TextBox() { PlaceholderText = "Nom", Top = 230, Left = 50, Width = 180, Visible = false };
-            txtPrenom = new TextBox() { PlaceholderText = "Prénom", Top = 260, Left = 50, Width = 180, Visible = false };
-            txtEmail = new TextBox() { PlaceholderText = "Email", Top = 290, Left = 50, Width = 180, Visible = false };
-            txtTel = new TextBox() { PlaceholderText = "Téléphone", Top = 320, Left = 50, Width = 180, Visible = false };
-            txtStation = new TextBox() { PlaceholderText = "Station proche", Top = 350, Left = 50, Width = 180, Visible = false };
-
-            txtNomEntreprise = new TextBox() { PlaceholderText = "Nom entreprise", Top = 230, Left = 50, Width = 180, Visible = false };
-            txtNomReferent = new TextBox() { PlaceholderText = "Nom référent", Top = 260, Left = 50, Width = 180, Visible = false };
-
-            btnValiderCompte = new Button() { Text = "Valider", Top = 400, Left = 90, Width = 120, Visible = false };
-            btnValiderCompte.Click += ValiderCreationCompte;
-
-            lblMessage = new Label() { Text = "", Top = 430, Left = 50, Width = 250, Visible = false };
-
-            Controls.AddRange(new Control[] {
-                txtMdp, rbUtilisateur, rbEntreprise, txtNom, txtPrenom, txtEmail, txtTel, txtStation,
-                txtNomEntreprise, txtNomReferent, btnValiderCompte, lblMessage
-            });
-            /// gestion du bouton se connecter
-            btnSeConnecter.Click += (sender, e) =>
-            {
-                var loginForm = new FormMain.ConnexionForm(sql);
-                loginForm.Owner = this; // Permet d'appeler AfficherMenuUtilisateur depuis FormMain
-                loginForm.ShowDialog();
-            };
-
-            ///affichage du formulaire de creation de compte
-            btnCreerCompte.Click += (sender, e) =>
-            {
-                lblMessage.Text = "";
-                lblMessage.Visible = false;
-
-                txtMdp.Visible = true;
-                rbUtilisateur.Visible = true;
-                rbEntreprise.Visible = true;
-                btnValiderCompte.Visible = true;
-
-                rbUtilisateur.CheckedChanged += (s, ev) => ToggleForm(true);
-                rbEntreprise.CheckedChanged += (s, ev) => ToggleForm(false);
-                rbUtilisateur.Checked = true; // Par défaut
-            };
-
-            ///bouton admin (non implémenté encore)
-            btnAdmin.Click += (sender, e) =>
-            {
-                MessageBox.Show("Admin (à implémenter)");
-            };
+            // Boutons principaux
+            btnSeConnecter = new Button() { Text = "Se connecter", Top = topOffset, Left = centerX, Width = 180 };
+            btnCreerCompte = new Button() { Text = "Créer un compte", Top = topOffset + 50, Left = centerX, Width = 180 };
+            btnAdmin = new Button() { Text = "Accès admin", Top = topOffset + 100, Left = centerX, Width = 180 };
 
             Controls.Add(btnSeConnecter);
             Controls.Add(btnCreerCompte);
             Controls.Add(btnAdmin);
+
+            // Champs pour création de compte
+            txtMdp = new TextBox() { PlaceholderText = "Mot de passe", Visible = false, Width = 180, Left = centerX };
+            txtNom = new TextBox() { PlaceholderText = "Nom", Visible = false, Width = 180, Left = centerX };
+            txtPrenom = new TextBox() { PlaceholderText = "Prénom", Visible = false, Width = 180, Left = centerX };
+            txtEmail = new TextBox() { PlaceholderText = "Email", Visible = false, Width = 180, Left = centerX };
+            txtTel = new TextBox() { PlaceholderText = "Téléphone", Visible = false, Width = 180, Left = centerX };
+            txtStation = new TextBox() { PlaceholderText = "Station proche", Visible = false, Width = 180, Left = centerX };
+            txtNomEntreprise = new TextBox() { PlaceholderText = "Nom entreprise", Visible = false, Width = 180, Left = centerX };
+            txtNomReferent = new TextBox() { PlaceholderText = "Nom référent", Visible = false, Width = 180, Left = centerX };
+            rbUtilisateur = new RadioButton() { Text = "Utilisateur", Visible = false, Left = centerX };
+            rbEntreprise = new RadioButton() { Text = "Entreprise", Visible = false, Left = centerX };
+
+            btnValiderCompte = new Button() { Text = "Valider", Width = 120, Visible = false, Left = (ClientSize.Width - 120) / 2 };
+            lblMessage = new Label() { Width = 300, Visible = false, Left = (ClientSize.Width - 300) / 2 };
+
+            btnValiderCompte.Click += ValiderCreationCompte;
+
+            Controls.AddRange(new Control[] {
+        txtMdp, txtNom, txtPrenom, txtEmail, txtTel, txtStation,
+        txtNomEntreprise, txtNomReferent, rbUtilisateur, rbEntreprise,
+        btnValiderCompte, lblMessage
+    });
+
+            // Gestion des événements
+            btnSeConnecter.Click += (sender, e) =>
+            {
+                var loginForm = new ConnexionForm(sql);
+                loginForm.Owner = this;
+                loginForm.ShowDialog();
+            };
+
+            btnCreerCompte.Click += (sender, e) =>
+            {
+                lblMessage.Visible = false;
+                int formTop = btnAdmin.Bottom + 30;
+
+                txtMdp.Top = formTop;
+                rbUtilisateur.Top = formTop + 40;
+                rbEntreprise.Top = formTop + 70;
+
+                txtNom.Top = formTop + 100;
+                txtPrenom.Top = formTop + 130;
+                txtEmail.Top = formTop + 160;
+                txtTel.Top = formTop + 190;
+                txtStation.Top = formTop + 220;
+                txtNomEntreprise.Top = formTop + 100;
+                txtNomReferent.Top = formTop + 130;
+
+                btnValiderCompte.Top = formTop + 270;
+                lblMessage.Top = formTop + 310;
+
+                foreach (var control in new Control[] {
+            txtMdp, rbUtilisateur, rbEntreprise, txtNom, txtPrenom,
+            txtEmail, txtTel, txtStation, txtNomEntreprise, txtNomReferent,
+            btnValiderCompte, lblMessage
+        }) control.Visible = true;
+
+                rbUtilisateur.CheckedChanged += (s, ev) => ToggleForm(true);
+                rbEntreprise.CheckedChanged += (s, ev) => ToggleForm(false);
+                rbUtilisateur.Checked = true;
+            };
+
+            btnAdmin.Click += (sender, e) => AfficherInterfaceAdmin();
         }
+
+
 
         /// <summary>
         /// C'est un moyen d'affçchage utilisé ici pour le compte classique et d'entreprise avec des
@@ -160,63 +190,68 @@ namespace Liv_In_Paris
                 sql.AjouterEntreprise(nomEntreprise, nomReferent, id, station);
             }
 
-            lblMessage.Text = $" Compte créé avec succès !\n ID attribué : {id}";
             lblMessage.Visible = true;
+            MessageBox.Show($" Compte créé avec succès !\n Votre ID : {id}", "Compte créé", MessageBoxButtons.OK, MessageBoxIcon.Information);
+
         }
 
         public void AfficherMenuUtilisateur(int id)
         {
             utilisateurID = id;
-            Controls.Clear(); /// Efface tous les anciens contrôles (login, création...)
+            Controls.Clear();
 
             bool estCuisinier = sql.rolecuisinier(id);
             bool estConsommateur = sql.roleconsommateur(id);
+
+            int buttonWidth = 250;
+            int centerX = (ClientSize.Width - buttonWidth) / 2;
 
             Label titre = new Label()
             {
                 Text = $"Bienvenue, utilisateur #{id}",
                 Top = 20,
-                Left = 50,
+                Left = (ClientSize.Width - 300) / 2,
                 Width = 300,
                 Font = new Font("Arial", 12, FontStyle.Bold)
             };
             Controls.Add(titre);
-            /// Ici on traite les 4 types de menu possible (alternant consomateur et cuisinier)
+
+            int top = 60;
+
+            void AjouterBoutonCentré(string texte, Action onClick)
+            {
+                Button btn = new Button()
+                {
+                    Text = texte,
+                    Top = top,
+                    Left = centerX,
+                    Width = buttonWidth
+                };
+                btn.Click += (s, e) => onClick();
+                Controls.Add(btn);
+                top += 40;
+            }
 
             if (!estCuisinier && !estConsommateur)
             {
-                // Menu00
-                Button btnCuisinier = new Button() { Text = "Devenir cuisinier", Top = 60, Left = 50, Width = 180 };
-                Button btnClient = new Button() { Text = "Devenir consommateur", Top = 100, Left = 50, Width = 180 };
-
-                btnCuisinier.Click += (s, e) =>
+                AjouterBoutonCentré("Devenir cuisinier", () =>
                 {
                     sql.AjouterCuisinier("cuisinier_" + id, id);
                     AfficherMenuUtilisateur(id);
-                };
+                });
 
-                btnClient.Click += (s, e) =>
+                AjouterBoutonCentré("Devenir consommateur", () =>
                 {
-                    Console.WriteLine("id: " + id);
-                    Console.WriteLine("rol: " + sql.roleconsommateur(id));
-
                     sql.AjouterConsommateur(id);
-
-                    Console.WriteLine("rol: " + sql.roleconsommateur(id));
-
-
                     AfficherMenuUtilisateur(id);
-                };
-
-                Controls.AddRange(new Control[] { btnCuisinier, btnClient });
+                });
             }
             else if (estCuisinier && !estConsommateur)
             {
-                // Menu10
-                AjouterBouton("Voir mes commandes", 60, () => AfficherCommandes(id));
-                AjouterBouton("Voir mes plats", 100, AfficherPlatsCuisinier);
-                AjouterBouton("Ajouter plat", 140, AfficherFormAjoutPlat);
-                AjouterBouton("Devenir consommateur", 180, () =>
+                AjouterBoutonCentré("Voir mes commandes", () => AfficherCommandes(id));
+                AjouterBoutonCentré("Voir mes plats", AfficherPlatsCuisinier);
+                AjouterBoutonCentré("Ajouter plat", AfficherFormAjoutPlat);
+                AjouterBoutonCentré("Devenir consommateur", () =>
                 {
                     sql.AjouterConsommateur(id);
                     AfficherMenuUtilisateur(id);
@@ -224,14 +259,13 @@ namespace Liv_In_Paris
             }
             else if (!estCuisinier && estConsommateur)
             {
-                // Menu01
-                AjouterBouton("Plats disponibles", 60, AfficherPlatsDisponibles);
-                AjouterBouton("Rechercher plat", 100, RechercherPlat);
-                AjouterBouton("Voir mes commandes", 140, () => AfficherCommandes(id));
-                AjouterBouton("Ajouter élément à commande", 180, AjouterElementCommande);
-                AjouterBouton("Passer une commande", 220, PasserCommande);
-                AjouterBouton("Noter une commande", 260, NoterCommande);
-                AjouterBouton("Devenir cuisinier", 300, () =>
+                AjouterBoutonCentré("Plats disponibles", AfficherPlatsDisponibles);
+                AjouterBoutonCentré("Rechercher plat", RechercherPlat);
+                AjouterBoutonCentré("Voir mes commandes", () => AfficherCommandes(id));
+                AjouterBoutonCentré("Ajouter élément à commande", AjouterElementCommande);
+                AjouterBoutonCentré("Passer une commande", PasserCommande);
+                AjouterBoutonCentré("Noter une commande", NoterCommande);
+                AjouterBoutonCentré("Devenir cuisinier", () =>
                 {
                     sql.AjouterCuisinier("cuisinier_" + id, id);
                     AfficherMenuUtilisateur(id);
@@ -239,18 +273,17 @@ namespace Liv_In_Paris
             }
             else
             {
-                // Menu11
-                AjouterBouton("Voir plats", 60, AfficherPlatsDisponibles);
-                AjouterBouton("Rechercher plat", 100, RechercherPlat);
-                AjouterBouton("Mes commandes (conso)", 140, () => AfficherCommandes(id));
-                AjouterBouton("Ajouter élément", 180, AjouterElementCommande);
-                AjouterBouton("Passer commande", 220, PasserCommande);
-                AjouterBouton("Noter commande", 260, NoterCommande);
-                AjouterBouton("Voir plats (cuisinier)", 300, AfficherPlatsCuisinier);
-                AjouterBouton("Ajouter plat (cuisinier)", 340, AfficherFormAjoutPlat);
-                AjouterBouton("Afficher statistiques", 380, AfficherStatistiques);
+                AjouterBoutonCentré("Voir plats", AfficherPlatsDisponibles);
+                AjouterBoutonCentré("Rechercher plat", RechercherPlat);
+                AjouterBoutonCentré("Mes commandes (conso)", () => AfficherCommandes(id));
+                AjouterBoutonCentré("Ajouter élément", AjouterElementCommande);
+                AjouterBoutonCentré("Passer commande", PasserCommande);
+                AjouterBoutonCentré("Noter commande", NoterCommande);
+                AjouterBoutonCentré("Voir plats (cuisinier)", AfficherPlatsCuisinier);
+                AjouterBoutonCentré("Ajouter plat (cuisinier)", AfficherFormAjoutPlat);
             }
         }
+
 
         /// <summary>
         /// mettre les boutons un par un prend beaucoup de espace
@@ -390,6 +423,16 @@ namespace Liv_In_Paris
 
         private void NoterCommande()
         {
+            int idConsommateur = sql.idduconsomateur(utilisateurID);
+            int idCuisinier = sql.idducuisinier(utilisateurID);
+
+
+            if (idConsommateur == idCuisinier)
+            {
+                MessageBox.Show("Tu ne peux pas noter ta propre commande !");
+                return;
+            }
+
             string idCommandeStr = Prompt.ShowDialog("Entrez l'ID de la commande :", "Noter Commande");
             if (!int.TryParse(idCommandeStr, out int idCommande))
             {
@@ -414,8 +457,9 @@ namespace Liv_In_Paris
             }
 
             string commentaireCuisinier = Prompt.ShowDialog("Entrez le commentaire du cuisinier :", "Noter Commande");
+            
+            sql.NoterCommande(idCommande, idConsommateur, idCuisinier, noteClient, commentaireClient, noteCuisinier, commentaireCuisinier);
 
-            sql.NoterCommande(idCommande, utilisateurID, utilisateurID, noteClient, commentaireClient, noteCuisinier, commentaireCuisinier);
             MessageBox.Show("Commande notée avec succès !");
         }
 
@@ -509,6 +553,34 @@ namespace Liv_In_Paris
             Controls.AddRange(new Control[] { txtNom, txtPrix, txtType, txtRegime, txtOrigine, txtPourCombien, btnValider });
         }
 
+        private void AfficherMenuPrincipal()
+        {
+            Controls.Clear();
+
+            // Ajout du logo
+            PictureBox logo = new PictureBox();
+            logo.Image = Image.FromFile(@"C:\Users\sanag\Documents\GitHub\Liv-In-Paris\Liv’In Paris\bin\Debug\net9.0-windows\logo.jpeg");
+            logo.Size = new Size(200, 200);
+            logo.SizeMode = PictureBoxSizeMode.Zoom;
+            logo.Left = (ClientSize.Width - logo.Width) / 2;
+            logo.Top = 20;
+            Controls.Add(logo);
+
+            int topOffset = logo.Bottom + 20;
+            int centerX = (ClientSize.Width - 180) / 2;
+
+            // Recrée les boutons
+            btnSeConnecter.Top = topOffset;
+            btnCreerCompte.Top = topOffset + 50;
+            btnAdmin.Top = topOffset + 100;
+
+            btnSeConnecter.Left = btnCreerCompte.Left = btnAdmin.Left = centerX;
+
+            Controls.Add(btnSeConnecter);
+            Controls.Add(btnCreerCompte);
+            Controls.Add(btnAdmin);
+        }
+
 
         private void AfficherStatistiques()
         {
@@ -524,18 +596,83 @@ namespace Liv_In_Paris
             listBox.Items.Add("Statistiques affichées dans la console.");
 
             Button btnRetour = new Button() { Text = "Retour", Top = 380, Left = 50, Width = 200 };
-            btnRetour.Click += (s, e) => AfficherMenuUtilisateur(utilisateurID);
+            btnRetour.Click += (s, e) => AfficherMenuPrincipal();
             Controls.Add(btnRetour);
         }
 
-        private string HashPassword(string password)
+        private void AfficherInterfaceAdmin()
         {
-            using (var sha256 = System.Security.Cryptography.SHA256.Create())
+            Controls.Clear();
+
+            Label lblTitre = new Label()
             {
-                byte[] bytes = sha256.ComputeHash(System.Text.Encoding.UTF8.GetBytes(password));
-                return BitConverter.ToString(bytes).Replace("-", "").ToLower();
-            }
+                Text = "Console SQL (admin)",
+                Top = 20,
+                Left = (ClientSize.Width - 300) / 2,
+                Width = 300,
+                Font = new Font("Arial", 12, FontStyle.Bold),
+                TextAlign = ContentAlignment.MiddleCenter
+            };
+            Controls.Add(lblTitre);
+
+            TextBox txtRequete = new TextBox()
+            {
+                Multiline = true,
+                Width = 600,
+                Height = 200,
+                Top = 60,
+                Left = (ClientSize.Width - 600) / 2,
+                Font = new Font("Consolas", 10),
+                ScrollBars = ScrollBars.Vertical
+            };
+            Controls.Add(txtRequete);
+
+            Label lblResultat = new Label()
+            {
+                Text = "",
+                Top = 270,
+                Left = (ClientSize.Width - 600) / 2,
+                Width = 600,
+                Height = 60,
+                ForeColor = Color.DarkGreen
+            };
+            Controls.Add(lblResultat);
+
+            Button btnExecuter = new Button()
+            {
+                Text = "Exécuter requête",
+                Top = 340,
+                Left = (ClientSize.Width - 150) / 2,
+                Width = 150
+            };
+            btnExecuter.Click += (s, e) =>
+            {
+                try
+                {
+                    SQL.ExecuterRequeteLibre(txtRequete.Text);
+                    lblResultat.ForeColor = Color.DarkGreen;
+                    lblResultat.Text = "Requête exécutée avec succès.";
+                }
+                catch (Exception ex)
+                {
+                    lblResultat.ForeColor = Color.DarkRed;
+                    lblResultat.Text = "Erreur : " + ex.Message;
+                }
+            };
+            Controls.Add(btnExecuter);
+
+            Button btnRetour = new Button()
+            {
+                Text = "Retour",
+                Top = 400,
+                Left = (ClientSize.Width - 150) / 2,
+                Width = 150
+            };
+            btnRetour.Click += (s, e) => AfficherMenuPrincipal();
+
+            Controls.Add(btnRetour);
         }
+
 
         private class ConnexionForm : Form
         {

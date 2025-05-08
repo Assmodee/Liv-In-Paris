@@ -11,6 +11,10 @@ using System.Linq;
 using System.Reflection.PortableExecutable;
 using System.Text;
 using System.Threading.Tasks;
+using System.Xml;
+
+using Newtonsoft.Json;
+using Formatting = Newtonsoft.Json.Formatting;
 
 namespace Liv_In_Paris
 {
@@ -21,7 +25,7 @@ namespace Liv_In_Paris
 
         private MySqlConnection conn;
 
-        /// Constructeur : ouvre la connexion automatiquement
+        
         public SQL()
         {
             conn = new MySqlConnection(connectionString);
@@ -36,7 +40,7 @@ namespace Liv_In_Paris
             }
         }
 
-        /// Ferme la connexion 
+        
         public void Close()
         {
             if (conn != null)
@@ -48,7 +52,7 @@ namespace Liv_In_Paris
 
         public string pourAlex()
         {
-            string result = "";
+            string verite = "";
 
             string query = @"
         SELECT 
@@ -87,7 +91,7 @@ namespace Liv_In_Paris
                             string chefName = reader.GetString("ChefName");
                             int chefId = reader.GetInt32("ChefAccount");
 
-                            result += $"{consumerName}|{consumerId};{chefName}|{chefId}\n";
+                            verite += $"{consumerName}|{consumerId};{chefName}|{chefId}\n";
                         }
                     }
                 }
@@ -101,7 +105,7 @@ namespace Liv_In_Paris
                 }
             }
 
-            return result;
+            return verite;
         }
 
 
@@ -109,7 +113,6 @@ namespace Liv_In_Paris
 
         #region client
 
-        //  Ajouter un client
         public void AjouterClient(int ID, string nom, string prenom, string email, string Tel, string Metro_le_plus_proche)
         {
             string query = "INSERT INTO Clients (ID,Nom, Prenom, Email,Tel,Metro_le_plus_proche) VALUES (@ID,@Nom, @Prenom, @Email, @Tel,@Metro_le_plus_proche)";
@@ -134,7 +137,7 @@ namespace Liv_In_Paris
             }
         }
 
-        //  Modifier un client
+       
         public void ModifierClient(int id, string nom, string prenom, string email, string Tel, string Metro_le_plus_proche)
         {
             string query = "UPDATE Clients SET Nom = @Nom, Prenom = @Prenom, Email = @Email, Tel = @Tel , Metro_le_plus_proche = @Metro_le_plus_proche WHERE ID = @ID";
@@ -160,7 +163,7 @@ namespace Liv_In_Paris
             }
         }
 
-        //  Supprimer un client
+        
         public void SupprimerClient(int id)
         {
             string query = "DELETE FROM Clients WHERE ID = @ID";
@@ -179,14 +182,14 @@ namespace Liv_In_Paris
             }
         }
 
-        //  Afficher tous les clients
+      
         public void AfficherClients(string critere = "ID")
         {
             string query = $"SELECT * FROM Clients ORDER BY {critere}";
             using (MySqlCommand cmd = new MySqlCommand(query, conn))
             using (MySqlDataReader reader = cmd.ExecuteReader())
             {
-                // Console.WriteLine("Liste des clients :");
+                
                 while (reader.Read())
                 {
                     Console.WriteLine($" {reader["ID"]}  {reader["Nom"]} {reader["Prenom"]} ({reader["Email"]})");
@@ -273,7 +276,7 @@ namespace Liv_In_Paris
             }
         }
 
-        public void SupprimerCompte(int id) /// on nutiliseras pas cette fonction on prefere bannir les comptes pour garder les infos et pouvoir detecter les gens qui font 2 comptes 
+        public void SupprimerCompte(int id) 
         {
             using (MySqlConnection conn = new MySqlConnection(connectionString))
             {
@@ -770,21 +773,7 @@ namespace Liv_In_Paris
             }
         }
 
-        //public void ModifierCommande(int idCommande, int prix, int quantite)
-        //{
-        //    using (MySqlConnection conn = new MySqlConnection(connectionString))
-        //    {
-        //        conn.Open();
-        //        string query = "UPDATE Commandes SET Prix=@prix, Quantite=@quantite WHERE id_commande=@idCommande";
-        //        using (MySqlCommand cmd = new MySqlCommand(query, conn))
-        //        {
-        //            cmd.Parameters.AddWithValue("@prix", prix);
-        //            cmd.Parameters.AddWithValue("@quantite", quantite);
-        //            cmd.Parameters.AddWithValue("@idCommande", idCommande);
-        //            cmd.ExecuteNonQuery();
-        //        }
-        //    }
-        //}
+        
 
         public void SupprimerCommande(int idCommande)
         {
@@ -1041,7 +1030,7 @@ namespace Liv_In_Paris
 
                 using (MySqlDataReader reader = cmd.ExecuteReader())
                 {
-                    if (reader.Read()) // Important !
+                    if (reader.Read()) 
                     {
                         result = reader.GetInt32(0);
                     }
@@ -1223,7 +1212,7 @@ namespace Liv_In_Paris
 
                 using (MySqlDataReader reader = cmd.ExecuteReader())
                 {
-                    if (reader.Read()) // Important !
+                    if (reader.Read()) 
                     {
                         result = reader.GetInt32(0);
                     }
@@ -1460,7 +1449,98 @@ WHERE conso.ID = @ID;";
 
         #endregion
 
-        #region poubelle
+
+        #region XML
+
+        public void ExporterTouteLaBaseEnXml(string cheminFichier)
+        {
+            try
+            {
+                using (MySqlConnection connexion = new MySqlConnection(connectionString))
+                {
+                    connexion.Open();
+
+                    DataSet baseDeDonnees = new DataSet("BaseDeDonnees");
+                    DataTable listeDesTables = connexion.GetSchema("Tables");
+
+                    foreach (DataRow ligne in listeDesTables.Rows)
+                    {
+                        string nomDeLaTable = ligne["TABLE_NAME"].ToString();
+
+                        string requete = $"SELECT * FROM `{nomDeLaTable}`";
+                        MySqlDataAdapter adaptateur = new MySqlDataAdapter(requete, connexion);
+
+                        DataTable table = new DataTable(nomDeLaTable);
+                        adaptateur.Fill(table);
+
+                        baseDeDonnees.Tables.Add(table);
+                    }
+
+                    baseDeDonnees.WriteXml(cheminFichier, XmlWriteMode.WriteSchema);
+                }
+            }
+            catch (Exception)
+            {
+                Console.WriteLine("mdr ta tout cassé ");
+            }
+        }
+
+
+
+
+
+        #endregion
+
+        #region JSON
+
+
+        public void ExporterTouteLaBaseEnJson(string cheminFichier)
+        {
+            try
+            {
+                using (MySqlConnection connexion = new MySqlConnection(connectionString))
+                {
+                    connexion.Open();
+
+                    DataSet baseDeDonnees = new DataSet("BaseDeDonnees");
+                    DataTable listeDesTables = connexion.GetSchema("Tables");
+
+                    foreach (DataRow ligne in listeDesTables.Rows)
+                    {
+                        string nomDeLaTable = ligne["TABLE_NAME"].ToString();
+
+                        string requete = $"SELECT * FROM `{nomDeLaTable}`";
+                        MySqlDataAdapter adaptateur = new MySqlDataAdapter(requete, connexion);
+
+                        DataTable table = new DataTable(nomDeLaTable);
+                        adaptateur.Fill(table);
+
+                        baseDeDonnees.Tables.Add(table);
+                    }
+
+                    string json = JsonConvert.SerializeObject(baseDeDonnees, Formatting.Indented);
+                    File.WriteAllText(cheminFichier, json);
+                }
+            }
+            catch (Exception)
+            {
+                Console.WriteLine("mdr ta tout cassé ");
+            }
+        }
+        #endregion
+
+
+
+
+
+
+
+
+
+
+
+
+            #region poubelle
 
         public string MyNameIs(int id, MySqlConnection conn)
         {

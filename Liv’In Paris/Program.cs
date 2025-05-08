@@ -18,6 +18,8 @@ namespace Liv_In_Paris
         {
             SQL sql = new SQL();
 
+            sql.ExporterTouteLaBaseEnXml("base_exporteeXML.xml");
+            sql.ExporterTouteLaBaseEnJson("base_exporteeJSON.json");
             Console.WriteLine(sql.NbCompte());
 
             string stationsFile = File.ReadAllText("Stations.txt");

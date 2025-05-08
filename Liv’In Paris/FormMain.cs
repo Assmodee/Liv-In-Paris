@@ -284,7 +284,7 @@ namespace Liv_In_Paris
             Label lblTitre = new Label() { Text = "Plats disponibles", Top = 20, Left = 50, Width = 200, Font = new Font("Arial", 12, FontStyle.Bold) };
             Controls.Add(lblTitre);
 
-            ListBox listBox = new ListBox() { Top = 60, Left = 50, Width = 200, Height = 300 };
+            ListBox listBox = new ListBox() { Top = 60, Left = 50, Width = 250, Height = 300 };
             Controls.Add(listBox);
 
             var plats = sql.AfficherTousLesMets();

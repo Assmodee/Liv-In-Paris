@@ -1,7 +1,9 @@
 ﻿using MySql.Data.MySqlClient;
+using Mysqlx.Session;
 using MySqlX.XDevAPI.Common;
 using Org.BouncyCastle.Asn1.Ocsp;
 using System;
+using System.Collections;
 using System.Collections.Generic;
 using System.ComponentModel.Design;
 using System.Data;
@@ -48,38 +50,62 @@ namespace Liv_In_Paris
         {
             string result = "";
 
-            
             string query = @"
-            SELECT 
-                conso.ID AS ConsumerAccount, 
-                cuis.ID AS ChefAccount
-            FROM Commandes cmd
-            JOIN Consommateur conso ON cmd.id_consommateur = conso.id_consommateur
-            JOIN Cuisinier cuis ON cmd.id_cuisinier = cuis.id_cuisinier;
-        ";
+        SELECT 
+            conso.ID AS ConsumerAccount,
+            cuis.ID AS ChefAccount,
+            CASE 
+                WHEN cli.ID IS NOT NULL THEN CONCAT(cli.Nom, ' ', cli.Prenom)
+                ELSE ent.nom_entreprise
+            END AS ConsumerName,
+            CASE 
+                WHEN cli2.ID IS NOT NULL THEN CONCAT(cli2.Nom, ' ', cli2.Prenom)
+                ELSE ent2.nom_entreprise
+            END AS ChefName
+        FROM Commandes cmd
+        JOIN Consommateur conso ON cmd.id_consommateur = conso.id_consommateur
+        JOIN cuisinier cuis ON cmd.id_cuisinier = cuis.id_cuisinier
+        LEFT JOIN Clients cli ON conso.ID = cli.ID
+        LEFT JOIN Entreprise ent ON conso.ID = ent.ID
+        LEFT JOIN Clients cli2 ON cuis.ID = cli2.ID
+        LEFT JOIN Entreprise ent2 ON cuis.ID = ent2.ID;
+    ";
 
             using (MySqlConnection conn = new MySqlConnection(connectionString))
             {
-                // magie noir 
-                conn.Open();
-                using (MySqlCommand cmd = new MySqlCommand(query, conn))
-                using (MySqlDataReader reader = cmd.ExecuteReader())
+                try
                 {
-                    while (reader.Read())
+                    conn.Open();
+                    using (MySqlCommand cmd = new MySqlCommand(query, conn))
+                    using (MySqlDataReader reader = cmd.ExecuteReader())
                     {
-                        int consumer = reader.GetInt32("ConsumerAccount");
-                        int chef = reader.GetInt32("ChefAccount");
+                        while (reader.Read())
+                        {
+                            string consumerName = reader.GetString("ConsumerName");
+                            int consumerId = reader.GetInt32("ConsumerAccount");
 
-                        
-                        result += consumer + "|"+ IDduidconso(consumer) +";"+ chef + "|" +IDduidcuisibier(chef) + "\n";
+                            string chefName = reader.GetString("ChefName");
+                            int chefId = reader.GetInt32("ChefAccount");
+
+                            result += $"{consumerName}|{consumerId};{chefName}|{chefId}\n";
+                        }
                     }
+                }
+                catch (MySqlException ex)
+                {
+                    Console.WriteLine("Erreur MySQL dans pourAlex : " + ex.Message);
+                }
+                catch (Exception ex)
+                {
+                    Console.WriteLine("Erreur dans pourAlex : " + ex.Message);
                 }
             }
 
-            
-
             return result;
         }
+
+
+
 
         #region client
 
@@ -174,6 +200,39 @@ namespace Liv_In_Paris
         #endregion
 
         #region compte
+
+
+        public int NbCompte()
+        {
+            int nb=0;
+            try
+            {
+                using (MySqlConnection conn = new MySqlConnection(connectionString))
+                {
+                    conn.Open();
+                    string query = "select COUNT(*) from compte";
+                    using (MySqlCommand cmd = new MySqlCommand(query, conn))
+                    {
+
+                        object value = cmd.ExecuteScalar();
+
+
+                        if (value != null && value != DBNull.Value)
+                        {
+                            nb = Convert.ToInt32(value); 
+                        }
+
+
+                    }
+                }
+            }
+            catch (MySqlException ex)
+            {
+                Console.WriteLine("Erreur MySQL : " + ex.Message);
+            }
+
+            return nb;
+        }
 
         public void AjouterCompte(string Mdp, bool est_utilisateur)
         {
@@ -992,48 +1051,7 @@ namespace Liv_In_Paris
             return result;
         }
 
-        public int IDduidconso(int id)
-        {
-            int result = 0;
-            string query = @"SELECT ID FROM consommateur WHERE id_consommateur = @id";
-
-            using (MySqlCommand cmd = new MySqlCommand(query, conn))
-            {
-                cmd.Parameters.AddWithValue("@id", id);
-
-                using (MySqlDataReader reader = cmd.ExecuteReader())
-                {
-                    if (reader.Read()) // Important !
-                    {
-                        result = reader.GetInt32(0);
-                    }
-                }
-            }
-
-            return result;
-        }
-
-        public int IDduidcuisibier(int id)
-        {
-            int result = 0;
-            string query = @"SELECT ID FROM cuisinier WHERE id_cuisinier = @id";
-
-            using (MySqlCommand cmd = new MySqlCommand(query, conn))
-            {
-                cmd.Parameters.AddWithValue("@id", id);
-
-                using (MySqlDataReader reader = cmd.ExecuteReader())
-                {
-                    if (reader.Read()) // Important !
-                    {
-                        result = reader.GetInt32(0);
-                    }
-                }
-            }
-
-            return result;
-        }
-
+       
 
         public decimal GetPrixCommande(int commandeId)
         {
@@ -1438,8 +1456,164 @@ WHERE conso.ID = @ID;";
             }
         }
 
+
+
         #endregion
 
+        #region poubelle
+
+        public string MyNameIs(int id, MySqlConnection conn)
+        {
+            string result = "";
+
+            try
+            {
+                if (WhyWeAreStillHereJustToSuffer(id, conn))
+                    result = GetClientName(id, conn);
+                else
+                    result = GetEntrepriseName(id, conn);
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine("Erreur dans MyNameIs(" + id + ") : " + ex.Message);
+                Console.WriteLine("StackTrace : " + ex.StackTrace);
+            }
+
+            return result;
+        }
+
+
+
+        public string GetClientName(int id, MySqlConnection connection)
+        {
+            string result = "";
+
+            string query = @"SELECT nom, prenom FROM client WHERE ID = @id";
+
+            using (MySqlCommand cmd = new MySqlCommand(query, connection))
+            {
+                cmd.Parameters.AddWithValue("@id", id);
+                using (MySqlDataReader reader = cmd.ExecuteReader())
+                {
+                    if (reader.Read())
+                    {
+                        result = reader.GetString("nom") + " " + reader.GetString("prenom");
+                    }
+                }
+            }
+
+            return result;
+        }
+
+
+        public string GetEntrepriseName(int id, MySqlConnection connection)
+        {
+            string result = "";
+
+            string query = @"SELECT nom_entreprise FROM entreprise WHERE ID = @id";
+
+            using (MySqlCommand cmd = new MySqlCommand(query, connection))
+            {
+                cmd.Parameters.AddWithValue("@id", id);
+                using (MySqlDataReader reader = cmd.ExecuteReader())
+                {
+                    if (reader.Read())
+                    {
+                        result = reader.GetString("nom_entreprise");
+                    }
+                }
+            }
+
+            return result;
+        }
+
+        public int IDduidconso(int id)
+        {
+            int result = 0;
+            string query = @"SELECT ID FROM consommateur WHERE id_consommateur = @id";
+
+            using (MySqlConnection conn = new MySqlConnection(connectionString))
+            {
+                conn.Open();
+                using (MySqlCommand cmd = new MySqlCommand(query, conn))
+                {
+                    cmd.Parameters.AddWithValue("@id", id);
+
+                    using (MySqlDataReader reader = cmd.ExecuteReader())
+                    {
+                        if (reader.Read()) // Important !
+                        {
+                            result = reader.GetInt32(0);
+                        }
+                    }
+                }
+            }
+
+
+            return result;
+        }
+
+        public int IDduidcuisibier(int id)
+        {
+            int result = 0;
+            string query = @"SELECT ID FROM cuisinier WHERE id_cuisinier = @id";
+
+            using (MySqlConnection conn = new MySqlConnection(connectionString))
+            {
+                conn.Open();
+
+                using (MySqlCommand cmd = new MySqlCommand(query, conn))
+                {
+                    cmd.Parameters.AddWithValue("@id", id);
+
+                    using (MySqlDataReader reader = cmd.ExecuteReader())
+                    {
+                        if (reader.Read()) // Important !
+                        {
+                            result = reader.GetInt32(0);
+                        }
+                    }
+                }
+            }
+
+            return result;
+        }
+        public bool WhyWeAreStillHereJustToSuffer(int id, MySqlConnection connection)
+        {
+            bool result = false;
+
+
+            string querry = @"SELECT est_utilisateur from Compte Where ID = @id";
+
+
+            try
+            {
+                using (MySqlCommand command = new MySqlCommand(querry, connection))
+                {
+
+                    object value = command.ExecuteScalar();
+
+
+                    if (value != null && value != DBNull.Value)
+                    {
+                        result = Convert.ToBoolean(value);
+                    }
+
+
+                }
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine("Une erreur s'est produite : " + ex.Message);
+            }
+
+
+
+
+            return result;
+        }
+
+        #endregion
     }
 }
 

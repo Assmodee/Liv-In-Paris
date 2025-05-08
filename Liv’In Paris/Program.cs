@@ -18,7 +18,7 @@ namespace Liv_In_Paris
         {
             SQL sql = new SQL();
 
-           
+            Console.WriteLine(sql.NbCompte());
 
             string stationsFile = File.ReadAllText("Stations.txt");
             string connexionsFile = File.ReadAllText("Connexions.txt");
@@ -47,6 +47,54 @@ namespace Liv_In_Paris
 
             var colorMap = metroGraph.Welsh_Powell();
             Drawing.DrawGraphFromCoordinates(stations, connexions, "graph_oriente.png", colorMap);
+
+            string usersConnections = sql.pourAlex();
+
+            List<Node<string>> users = new List<Node<string>>();
+            List<List<int>> usersRelations = new List<List<int>>();
+            List<List<double>> relationsWeights = new List<List<double>>();
+            Dictionary<string, int> idToName = new Dictionary<string, int>();
+            List<int> registeredIds = new List<int>();
+
+            for (int i = 0; i < sql.NbCompte() + 1; i++)
+            {
+                usersRelations.Add(new List<int>());
+                relationsWeights.Add(new List<double>());
+            }
+
+            foreach (string line in usersConnections.Split('\n'))
+            {
+                List<string> lineInfo = GetConnectionInfo(line);
+                if (lineInfo.Count > 1)
+                {
+                    foreach (string info in lineInfo)
+                    {
+                        Console.Write(info + " ");
+                    }
+                    Console.WriteLine();
+                    if (!registeredIds.Contains(int.Parse(lineInfo[1])))
+                    {
+                        users.Add(new Node<string>(int.Parse(lineInfo[1]), lineInfo[0], 0, 0));
+                        idToName[lineInfo[0]] = int.Parse(lineInfo[1]);
+                    }
+                    if (!registeredIds.Contains(int.Parse(lineInfo[3])))
+                    {
+                        users.Add(new Node<string>(int.Parse(lineInfo[3]), lineInfo[2], 0, 0));
+                        idToName[lineInfo[2]] = int.Parse(lineInfo[3]);
+                    }
+                    if (!usersRelations[int.Parse(lineInfo[1])].Contains(int.Parse(lineInfo[3])))
+                    {
+                        usersRelations[int.Parse(lineInfo[1])].Add(int.Parse(lineInfo[3]));
+                        usersRelations[int.Parse(lineInfo[3])].Add(int.Parse(lineInfo[1]));
+                        relationsWeights[int.Parse(lineInfo[1])].Add(1.0);
+                        relationsWeights[int.Parse(lineInfo[3])].Add(1.0);
+                    }
+                }
+            }
+
+            Graph<string> usersGraph = new Graph<string>(usersRelations, users, relationsWeights, idToName);
+
+
             t.TestFunction();
             
 
@@ -175,6 +223,29 @@ namespace Liv_In_Paris
         }
 
         #endregion
+
+
+        static List<string> GetConnectionInfo(string order)
+        {
+            List<string> info = new List<string>();
+
+            string token = "";
+            for (int i = 0; i < order.Length; i++)
+            {
+                if (order[i] == '|' || order[i] == ';')
+                {
+                    info.Add(token);
+                    token = "";
+                }
+                else
+                {
+                    token += order[i];
+                }
+            }
+            info.Add(token);
+
+            return info;
+        }
 
 
         static void menu1(SQL sql, Graph<string> graph)

@@ -432,8 +432,8 @@ namespace Liv_In_Paris
 
         private void PasserCommande()
         {
-            // Afficher les cuisiniers disponibles dans la console
-            var cuisiniers = sql.ObtenirTousLesCuisiniers(); // à implémenter dans ta classe SQL
+            /// Afficher les cuisiniers disponibles dans la console
+            var cuisiniers = sql.ObtenirTousLesCuisiniers(); /// à implémenter dans ta classe SQL
 
             if (cuisiniers.Count == 0)
             {
@@ -455,7 +455,7 @@ namespace Liv_In_Paris
                 return;
             }
 
-            if (!sql.rolecuisinier(idCuisinier)) // Attention ici ! c'était inversé dans ton code
+            if (!sql.rolecuisinier(idCuisinier)) /// Attention ici ! c'était inversé dans ton code
             {
                 MessageBox.Show("Cet ID ne correspond pas à un cuisinier.");
                 return;
@@ -572,7 +572,7 @@ namespace Liv_In_Paris
             Controls.Add(listBox);
 
             int idCuisinier = sql.idducuisinier(utilisateurID);
-            var plats = sql.AfficherTousLesMetsducuisto(idCuisinier); // Cette méthode doit retourner une List<string>
+            var plats = sql.AfficherTousLesMetsducuisto(idCuisinier);
 
             foreach (var plat in plats)
             {
@@ -670,21 +670,21 @@ namespace Liv_In_Paris
             };
             Controls.Add(txtResultats);
 
-            // Capture de la console
+            /// Capture de la console
             var stringWriter = new StringWriter();
             Console.SetOut(stringWriter);
 
-            // Appels aux méthodes SQL
+            /// Appels aux méthodes SQL
             sql.AfficherLivraisonsParCuisinier();
             sql.AfficherMoyennePrixCommandes();
 
-            // Restauration de la console standard
+            /// Restauration de la console standard
             Console.SetOut(new StreamWriter(Console.OpenStandardOutput()) { AutoFlush = true });
 
-            // Affichage dans la TextBox
+            /// Affichage dans la TextBox
             txtResultats.Text = stringWriter.ToString();
 
-            // Bouton retour
+            /// Bouton retour
             Button btnRetour = new Button()
             {
                 Text = "Retour",
@@ -843,6 +843,7 @@ namespace Liv_In_Paris
 
     public static class Prompt
     {
+
         public static string ShowDialog(string text, string caption)
         {
             Form prompt = new Form()
@@ -853,7 +854,7 @@ namespace Liv_In_Paris
             };
 
             Label lblText = new Label() { Left = 10, Top = 10, Text = text, Width = 260 };
-            TextBox txtInput = new TextBox() { Left = 10, Top = 40, Width = 260 };
+            TextBox txtInput = new TextBox() { Left = 10, Top = 40, Width = 261 };
             Button btnOk = new Button() { Text = "OK", Left = 200, Top = 70, Width = 70 };
 
             string result = null;

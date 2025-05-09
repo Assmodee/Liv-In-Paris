@@ -1693,6 +1693,33 @@ WHERE conso.ID = @ID;";
         }
 
         #endregion
+
+        public List<(int id, string pseudo)> ObtenirTousLesCuisiniers()
+        {
+            var resultat = new List<(int, string)>();
+
+            using (var connexion = new MySqlConnection(connectionString))
+            {
+                connexion.Open();
+                string requete = "SELECT id_cuisinier, nom_cuisinier FROM cuisinier";
+
+                using (var commande = new MySqlCommand(requete, connexion))
+                using (var reader = commande.ExecuteReader())
+                {
+                    while (reader.Read())
+                    {
+                        int id = reader.GetInt32("id_cuisinier");
+                        string pseudo = reader.GetString("nom_cuisinier");
+                        resultat.Add((id, pseudo));
+                    }
+                }
+            }
+
+            return resultat;
+        }
+
+
+
     }
 }
 

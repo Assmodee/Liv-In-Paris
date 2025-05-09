@@ -31,6 +31,10 @@ namespace Liv_In_Paris
         private int currentPage = 0; 
         private const int itemsPerPage = 10; /// Nombre d'éléments par page
 
+        
+        private Panel panelMenuPrincipal;
+
+
         private SQL sql; /// Garde une instance partagée
 
         /// constructeur principal de l'interface
@@ -38,61 +42,68 @@ namespace Liv_In_Paris
         {
             sql = new SQL();
 
-            // Titre et taille de la fenêtre
+            /// Configuration de la fenêtre principale
             Text = "Menu principal";
             Width = 800;
             Height = 800;
-            StartPosition = FormStartPosition.CenterScreen; // Centrer la fenêtre sur l'écran
-
-            // Définir la couleur de fond
+            StartPosition = FormStartPosition.CenterScreen;
             BackColor = Color.FromArgb(255, 165, 196, 201);
 
-            // Ajout du logo
+            /// Initialisation des champs de formulaire (hors affichage)
+            txtMdp = new TextBox();
+            txtNom = new TextBox();
+            txtPrenom = new TextBox();
+            txtEmail = new TextBox();
+            txtTel = new TextBox();
+            txtStation = new TextBox();
+            txtNomEntreprise = new TextBox();
+            txtNomReferent = new TextBox();
+            rbUtilisateur = new RadioButton();
+            rbEntreprise = new RadioButton();
+            btnValiderCompte = new Button();
+            lblMessage = new Label();
+
+            /// Initialisation des boutons principaux (hors affichage)
+            btnSeConnecter = new Button();
+            btnCreerCompte = new Button();
+            btnAdmin = new Button();
+
+            // Appel direct au menu principal complet
+            AfficherMenuPrincipal();
+        }
+
+        private void AfficherMenuPrincipal()
+        {
+            Controls.Clear();
+
+            /// Logo Cookhub tm
             PictureBox logo = new PictureBox();
-            logo.Image = Image.FromFile(@"C:\Users\sanag\Documents\GitHub\Liv-In-Paris\Liv’In Paris\bin\Debug\net9.0-windows\logo.jpeg");
-            logo.Size = new Size(200, 200); // carré
+            logo.Image = Image.FromFile(@"logo.jpeg");
+            logo.Size = new Size(200, 200);
             logo.SizeMode = PictureBoxSizeMode.Zoom;
-            logo.Left = (ClientSize.Width - logo.Width) / 2; // centré horizontalement
+            logo.Left = (ClientSize.Width - logo.Width) / 2;
             logo.Top = 20;
             Controls.Add(logo);
 
-            // Espacement vertical de base sous le logo
             int topOffset = logo.Bottom + 20;
             int centerX = (ClientSize.Width - 180) / 2;
 
-            // Boutons principaux
-            btnSeConnecter = new Button() { Text = "Se connecter", Top = topOffset, Left = centerX, Width = 180 };
-            btnCreerCompte = new Button() { Text = "Créer un compte", Top = topOffset + 50, Left = centerX, Width = 180 };
-            btnAdmin = new Button() { Text = "Accès admin", Top = topOffset + 100, Left = centerX, Width = 180 };
+            /// Boutons principaux (réinitialisation complète)
+            btnSeConnecter.Text = "Se connecter";
+            btnSeConnecter.Width = 180;
+            btnSeConnecter.Top = topOffset;
+            btnSeConnecter.Left = centerX;
 
-            Controls.Add(btnSeConnecter);
-            Controls.Add(btnCreerCompte);
-            Controls.Add(btnAdmin);
+            btnCreerCompte.Text = "Créer un compte";
+            btnCreerCompte.Width = 180;
+            btnCreerCompte.Top = topOffset + 50;
+            btnCreerCompte.Left = centerX;
 
-            // Champs pour création de compte
-            txtMdp = new TextBox() { PlaceholderText = "Mot de passe", Visible = false, Width = 180, Left = centerX };
-            txtNom = new TextBox() { PlaceholderText = "Nom", Visible = false, Width = 180, Left = centerX };
-            txtPrenom = new TextBox() { PlaceholderText = "Prénom", Visible = false, Width = 180, Left = centerX };
-            txtEmail = new TextBox() { PlaceholderText = "Email", Visible = false, Width = 180, Left = centerX };
-            txtTel = new TextBox() { PlaceholderText = "Téléphone", Visible = false, Width = 180, Left = centerX };
-            txtStation = new TextBox() { PlaceholderText = "Station proche", Visible = false, Width = 180, Left = centerX };
-            txtNomEntreprise = new TextBox() { PlaceholderText = "Nom entreprise", Visible = false, Width = 180, Left = centerX };
-            txtNomReferent = new TextBox() { PlaceholderText = "Nom référent", Visible = false, Width = 180, Left = centerX };
-            rbUtilisateur = new RadioButton() { Text = "Utilisateur", Visible = false, Left = centerX };
-            rbEntreprise = new RadioButton() { Text = "Entreprise", Visible = false, Left = centerX };
+            btnAdmin.Text = "Accès admin";
+            btnAdmin.Width = 180;
+            btnAdmin.Top = topOffset + 100;
+            btnAdmin.Left = centerX;
 
-            btnValiderCompte = new Button() { Text = "Valider", Width = 120, Visible = false, Left = (ClientSize.Width - 120) / 2 };
-            lblMessage = new Label() { Width = 300, Visible = false, Left = (ClientSize.Width - 300) / 2 };
-
-            btnValiderCompte.Click += ValiderCreationCompte;
-
-            Controls.AddRange(new Control[] {
-        txtMdp, txtNom, txtPrenom, txtEmail, txtTel, txtStation,
-        txtNomEntreprise, txtNomReferent, rbUtilisateur, rbEntreprise,
-        btnValiderCompte, lblMessage
-    });
-
-            // Gestion des événements
             btnSeConnecter.Click += (sender, e) =>
             {
                 var loginForm = new ConnexionForm(sql);
@@ -102,37 +113,62 @@ namespace Liv_In_Paris
 
             btnCreerCompte.Click += (sender, e) =>
             {
-                lblMessage.Visible = false;
-                int formTop = btnAdmin.Bottom + 30;
-
-                txtMdp.Top = formTop;
-                rbUtilisateur.Top = formTop + 40;
-                rbEntreprise.Top = formTop + 70;
-
-                txtNom.Top = formTop + 100;
-                txtPrenom.Top = formTop + 130;
-                txtEmail.Top = formTop + 160;
-                txtTel.Top = formTop + 190;
-                txtStation.Top = formTop + 220;
-                txtNomEntreprise.Top = formTop + 100;
-                txtNomReferent.Top = formTop + 130;
-
-                btnValiderCompte.Top = formTop + 270;
-                lblMessage.Top = formTop + 310;
-
-                foreach (var control in new Control[] {
-            txtMdp, rbUtilisateur, rbEntreprise, txtNom, txtPrenom,
-            txtEmail, txtTel, txtStation, txtNomEntreprise, txtNomReferent,
-            btnValiderCompte, lblMessage
-        }) control.Visible = true;
-
-                rbUtilisateur.CheckedChanged += (s, ev) => ToggleForm(true);
-                rbEntreprise.CheckedChanged += (s, ev) => ToggleForm(false);
-                rbUtilisateur.Checked = true;
+                AfficherFormulaireCreationCompte();
             };
 
-            btnAdmin.Click += (sender, e) => AfficherInterfaceAdmin();
+            btnAdmin.Click += (sender, e) =>
+            {
+                AfficherInterfaceAdmin();
+            };
+
+            Controls.AddRange(new Control[] { btnSeConnecter, btnCreerCompte, btnAdmin });
         }
+
+
+        private void AfficherFormulaireCreationCompte()
+        {
+            Controls.Clear();
+
+            int centerX = (ClientSize.Width - 180) / 2;
+            int top = 20;
+
+            /// Champs visibles pour le mot de passe et le choix de type
+            txtMdp = new TextBox() { PlaceholderText = "Mot de passe", Top = top, Left = centerX, Width = 180 };
+            rbUtilisateur = new RadioButton() { Text = "Utilisateur", Top = top + 40, Left = centerX };
+            rbEntreprise = new RadioButton() { Text = "Entreprise", Top = top + 70, Left = centerX };
+
+            /// Champs utilisateurs
+            txtNom = new TextBox() { PlaceholderText = "Nom", Top = top + 100, Left = centerX, Width = 180 };
+            txtPrenom = new TextBox() { PlaceholderText = "Prénom", Top = top + 130, Left = centerX, Width = 180 };
+            txtEmail = new TextBox() { PlaceholderText = "Email", Top = top + 160, Left = centerX, Width = 180 };
+            txtTel = new TextBox() { PlaceholderText = "Téléphone", Top = top + 190, Left = centerX, Width = 180 };
+            txtStation = new TextBox() { PlaceholderText = "Station proche", Top = top + 220, Left = centerX, Width = 180 };
+
+            /// Champs entreprise (mêmes positions que utilisateur)
+            txtNomEntreprise = new TextBox() { PlaceholderText = "Nom entreprise", Top = top + 100, Left = centerX, Width = 180 };
+            txtNomReferent = new TextBox() { PlaceholderText = "Nom référent", Top = top + 130, Left = centerX, Width = 180 };
+
+            /// Bouton valider + message
+            btnValiderCompte = new Button() { Text = "Valider", Top = top + 270, Left = (ClientSize.Width - 120) / 2, Width = 120 };
+            btnValiderCompte.Click += ValiderCreationCompte;
+
+            lblMessage = new Label() { Width = 300, Top = top + 310, Left = (ClientSize.Width - 300) / 2 };
+
+            /// Ajout au formulaire
+            Controls.AddRange(new Control[]
+            {
+        txtMdp, rbUtilisateur, rbEntreprise,
+        txtNom, txtPrenom, txtEmail, txtTel, txtStation,
+        txtNomEntreprise, txtNomReferent,
+        btnValiderCompte, lblMessage
+            });
+
+            /// Logique de bascule entre utilisateur et entreprise
+            rbUtilisateur.CheckedChanged += (s, e) => ToggleForm(true);
+            rbEntreprise.CheckedChanged += (s, e) => ToggleForm(false);
+            rbUtilisateur.Checked = true;
+        }
+
 
 
 
@@ -167,7 +203,6 @@ namespace Liv_In_Paris
             string mdp = txtMdp.Text;
             bool estUtilisateur = rbUtilisateur.Checked;
 
-            // Utilisation directe du mot de passe, sans hachage
             sql.AjouterCompte(mdp, estUtilisateur);
             int id = sql.DernierID();
 
@@ -193,19 +228,27 @@ namespace Liv_In_Paris
             lblMessage.Visible = true;
             MessageBox.Show($" Compte créé avec succès !\n Votre ID : {id}", "Compte créé", MessageBoxButtons.OK, MessageBoxIcon.Information);
 
+            AfficherMenuPrincipal();
         }
 
+        /// Affiche le menu utilisateur avec des options selon ses rôles (cuisinier, consommateur)
         public void AfficherMenuUtilisateur(int id)
         {
+            /// Stocke l'ID de l'utilisateur connecté
             utilisateurID = id;
+
+            /// Efface tous les éléments de l'interface précédents
             Controls.Clear();
 
+            /// Vérifie les rôles de l'utilisateur
             bool estCuisinier = sql.rolecuisinier(id);
             bool estConsommateur = sql.roleconsommateur(id);
 
+            /// Calcule la largeur et la position centrale des boutons
             int buttonWidth = 250;
             int centerX = (ClientSize.Width - buttonWidth) / 2;
 
+            /// Ajoute un titre centré en haut
             Label titre = new Label()
             {
                 Text = $"Bienvenue, utilisateur #{id}",
@@ -216,8 +259,10 @@ namespace Liv_In_Paris
             };
             Controls.Add(titre);
 
+            /// Position verticale de départ pour les boutons
             int top = 60;
 
+            /// Fonction interne pour ajouter des boutons centrés verticalement
             void AjouterBoutonCentré(string texte, Action onClick)
             {
                 Button btn = new Button()
@@ -232,6 +277,7 @@ namespace Liv_In_Paris
                 top += 40;
             }
 
+            /// Cas 1 : l'utilisateur n'est ni cuisinier ni consommateur
             if (!estCuisinier && !estConsommateur)
             {
                 AjouterBoutonCentré("Devenir cuisinier", () =>
@@ -246,6 +292,7 @@ namespace Liv_In_Paris
                     AfficherMenuUtilisateur(id);
                 });
             }
+            /// Cas 2 : utilisateur est cuisinier seulement
             else if (estCuisinier && !estConsommateur)
             {
                 AjouterBoutonCentré("Voir mes commandes", () => AfficherCommandes(id));
@@ -257,6 +304,7 @@ namespace Liv_In_Paris
                     AfficherMenuUtilisateur(id);
                 });
             }
+            /// Cas 3 : utilisateur est consommateur seulement
             else if (!estCuisinier && estConsommateur)
             {
                 AjouterBoutonCentré("Plats disponibles", AfficherPlatsDisponibles);
@@ -271,6 +319,7 @@ namespace Liv_In_Paris
                     AfficherMenuUtilisateur(id);
                 });
             }
+            /// Cas 4 : utilisateur est à la fois cuisinier et consommateur
             else
             {
                 AjouterBoutonCentré("Voir plats", AfficherPlatsDisponibles);
@@ -282,7 +331,20 @@ namespace Liv_In_Paris
                 AjouterBoutonCentré("Voir plats (cuisinier)", AfficherPlatsCuisinier);
                 AjouterBoutonCentré("Ajouter plat (cuisinier)", AfficherFormAjoutPlat);
             }
+
+            /// Ajoute un bouton retour en bas de page
+            top += 20;
+            Button btnRetour = new Button()
+            {
+                Text = "Retour au menu principal",
+                Top = top,
+                Left = centerX,
+                Width = buttonWidth
+            };
+            btnRetour.Click += (s, e) => AfficherMenuPrincipal(); // Retour au menu d’accueil
+            Controls.Add(btnRetour);
         }
+
 
 
         /// <summary>
@@ -370,6 +432,21 @@ namespace Liv_In_Paris
 
         private void PasserCommande()
         {
+            // Afficher les cuisiniers disponibles dans la console
+            var cuisiniers = sql.ObtenirTousLesCuisiniers(); // à implémenter dans ta classe SQL
+
+            if (cuisiniers.Count == 0)
+            {
+                MessageBox.Show("Aucun cuisinier disponible pour le moment.");
+                return;
+            }
+
+            Console.WriteLine("Liste des cuisiniers disponibles :");
+            foreach (var (id, pseudo) in cuisiniers)
+            {
+                Console.WriteLine($"ID : {id}, Pseudo : {pseudo}");
+            }
+
             string inputId = Prompt.ShowDialog("Entrez l'ID du cuisinier :", "Passer une commande");
 
             if (!int.TryParse(inputId, out int idCuisinier))
@@ -378,8 +455,7 @@ namespace Liv_In_Paris
                 return;
             }
 
-            // Vérifie que cet ID appartient bien à un cuisinier
-            if (sql.rolecuisinier(idCuisinier))
+            if (!sql.rolecuisinier(idCuisinier)) // Attention ici ! c'était inversé dans ton code
             {
                 MessageBox.Show("Cet ID ne correspond pas à un cuisinier.");
                 return;
@@ -392,6 +468,7 @@ namespace Liv_In_Paris
             sql.AjouterCommande(fabrication, peremption, idConsommateur, idCuisinier);
             MessageBox.Show("Commande ajoutée avec succès !");
         }
+
 
 
         private void AjouterElementCommande()
@@ -424,12 +501,19 @@ namespace Liv_In_Paris
         private void NoterCommande()
         {
             int idConsommateur = sql.idduconsomateur(utilisateurID);
+            int idCompteCuisinier = sql.idducuisinier(utilisateurID); 
             int idCuisinier = sql.idducuisinier(utilisateurID);
 
 
-            if (idConsommateur == idCuisinier)
+            if (idConsommateur == idCompteCuisinier)
             {
                 MessageBox.Show("Tu ne peux pas noter ta propre commande !");
+                return;
+            }
+
+            if (idCuisinier <=0)
+            {
+                MessageBox.Show("Erreur : ID du cuisinier introuvable.");
                 return;
             }
 
@@ -457,11 +541,12 @@ namespace Liv_In_Paris
             }
 
             string commentaireCuisinier = Prompt.ShowDialog("Entrez le commentaire du cuisinier :", "Noter Commande");
-            
-            sql.NoterCommande(idCommande, idConsommateur, idCuisinier, noteClient, commentaireClient, noteCuisinier, commentaireCuisinier);
+
+            sql.NoterCommande(idCommande, idCuisinier, idConsommateur, noteClient, commentaireClient, noteCuisinier, commentaireCuisinier);
 
             MessageBox.Show("Commande notée avec succès !");
         }
+
 
         private void AfficherPlatsCuisinier()
         {
@@ -553,52 +638,64 @@ namespace Liv_In_Paris
             Controls.AddRange(new Control[] { txtNom, txtPrix, txtType, txtRegime, txtOrigine, txtPourCombien, btnValider });
         }
 
-        private void AfficherMenuPrincipal()
-        {
-            Controls.Clear();
+        
 
-            // Ajout du logo
-            PictureBox logo = new PictureBox();
-            logo.Image = Image.FromFile(@"C:\Users\sanag\Documents\GitHub\Liv-In-Paris\Liv’In Paris\bin\Debug\net9.0-windows\logo.jpeg");
-            logo.Size = new Size(200, 200);
-            logo.SizeMode = PictureBoxSizeMode.Zoom;
-            logo.Left = (ClientSize.Width - logo.Width) / 2;
-            logo.Top = 20;
-            Controls.Add(logo);
-
-            int topOffset = logo.Bottom + 20;
-            int centerX = (ClientSize.Width - 180) / 2;
-
-            // Recrée les boutons
-            btnSeConnecter.Top = topOffset;
-            btnCreerCompte.Top = topOffset + 50;
-            btnAdmin.Top = topOffset + 100;
-
-            btnSeConnecter.Left = btnCreerCompte.Left = btnAdmin.Left = centerX;
-
-            Controls.Add(btnSeConnecter);
-            Controls.Add(btnCreerCompte);
-            Controls.Add(btnAdmin);
-        }
 
 
         private void AfficherStatistiques()
         {
             Controls.Clear();
 
-            Label lblTitre = new Label() { Text = "Statistiques", Top = 20, Left = 50, Width = 200, Font = new Font("Arial", 12, FontStyle.Bold) };
+            Label lblTitre = new Label()
+            {
+                Text = "Statistiques",
+                Top = 20,
+                Left = 50,
+                Width = 600,
+                Font = new Font("Arial", 12, FontStyle.Bold)
+            };
             Controls.Add(lblTitre);
 
-            ListBox listBox = new ListBox() { Top = 60, Left = 50, Width = 200, Height = 300 };
-            Controls.Add(listBox);
+            // Zone d'affichage des résultats
+            TextBox txtResultats = new TextBox()
+            {
+                Multiline = true,
+                ReadOnly = true,
+                ScrollBars = ScrollBars.Vertical,
+                Top = 60,
+                Left = 50,
+                Width = 680,
+                Height = 300,
+                Font = new Font("Consolas", 10)
+            };
+            Controls.Add(txtResultats);
 
+            // Capture de la console
+            var stringWriter = new StringWriter();
+            Console.SetOut(stringWriter);
+
+            // Appels aux méthodes SQL
             sql.AfficherLivraisonsParCuisinier();
-            listBox.Items.Add("Statistiques affichées dans la console.");
+            sql.AfficherMoyennePrixCommandes();
 
-            Button btnRetour = new Button() { Text = "Retour", Top = 380, Left = 50, Width = 200 };
-            btnRetour.Click += (s, e) => AfficherMenuPrincipal();
+            // Restauration de la console standard
+            Console.SetOut(new StreamWriter(Console.OpenStandardOutput()) { AutoFlush = true });
+
+            // Affichage dans la TextBox
+            txtResultats.Text = stringWriter.ToString();
+
+            // Bouton retour
+            Button btnRetour = new Button()
+            {
+                Text = "Retour",
+                Top = 380,
+                Left = 50,
+                Width = 200
+            };
+            btnRetour.Click += (s, e) => AfficherInterfaceAdmin();
             Controls.Add(btnRetour);
         }
+
 
         private void AfficherInterfaceAdmin()
         {
@@ -642,7 +739,7 @@ namespace Liv_In_Paris
             {
                 Text = "Exécuter requête",
                 Top = 340,
-                Left = (ClientSize.Width - 150) / 2,
+                Left = (ClientSize.Width - 310) / 2,
                 Width = 150
             };
             btnExecuter.Click += (s, e) =>
@@ -661,6 +758,16 @@ namespace Liv_In_Paris
             };
             Controls.Add(btnExecuter);
 
+            Button btnStatistiques = new Button()
+            {
+                Text = "Statistiques",
+                Top = 340,
+                Left = (ClientSize.Width + 10) / 2,
+                Width = 150
+            };
+            btnStatistiques.Click += (s, e) => AfficherStatistiques();
+            Controls.Add(btnStatistiques);
+
             Button btnRetour = new Button()
             {
                 Text = "Retour",
@@ -672,6 +779,7 @@ namespace Liv_In_Paris
 
             Controls.Add(btnRetour);
         }
+
 
 
         private class ConnexionForm : Form

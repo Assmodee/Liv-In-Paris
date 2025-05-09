@@ -78,7 +78,7 @@ namespace Liv_In_Paris
 
             /// Logo Cookhub tm
             PictureBox logo = new PictureBox();
-            logo.Image = Image.FromFile(@"logo.jpeg");
+            logo.Image = Image.FromFile("logo.jpeg");
             logo.Size = new Size(200, 200);
             logo.SizeMode = PictureBoxSizeMode.Zoom;
             logo.Left = (ClientSize.Width - logo.Width) / 2;
